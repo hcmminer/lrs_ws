@@ -1,0 +1,18 @@
+package com.viettel.base.cms.service;
+
+import com.viettel.base.cms.dto.CommonInputDTO;
+import com.viettel.base.cms.dto.ImageDTO;
+import com.viettel.base.cms.model.ConstructionDetail;
+import com.viettel.base.cms.model.Staff;
+
+import java.util.List;
+
+public interface ConstructionManagementService {
+    void updateConstructionStartDate(CommonInputDTO commonInputDTO) throws Exception;
+    void updateConstructionItemStartDate(CommonInputDTO commonInputDTO) throws Exception;
+    void createApproveRequest(CommonInputDTO commonInputDTO, Staff staff) throws Exception;
+//    ImageDTO getImage(Long imageId) throws Exception;
+    void approveConstructionItem(CommonInputDTO commonInputDTO) throws Exception;
+    ConstructionDetail getConstructionDetailById(Long constructionDetailId) throws Exception;
+    List<ConstructionDetail> getListCDWithStep(Long constructionId, Long step) throws Exception;
+}

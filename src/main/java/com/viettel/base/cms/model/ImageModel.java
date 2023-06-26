@@ -1,0 +1,68 @@
+package com.viettel.base.cms.model;
+
+import com.viettel.vfw5.base.dto.BaseFWDTO;
+import com.viettel.vfw5.base.model.BaseFWModel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.springframework.stereotype.Component;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "image_info")
+// causes Lombok to generate toString(), equals(), hashCode(), getter() & setter(), and Required arguments constructor in one go.
+@Data
+// causes Lombok to implement the Builder design pattern for the Pojo class.
+// usage can be seen in DefaultBeersLoader.java -> createNewBeer() method.
+@Builder
+// causes Lombok to generate a constructor with no parameters.
+@NoArgsConstructor
+// causes Lombok to generate a constructor with 1 parameter for each field in your class.
+@AllArgsConstructor
+@Component
+public class ImageModel extends BaseFWModel {
+    @Id
+    @Column(name = "image_id", nullable = false)
+    private Long imageId;
+
+    @Column(name = "construction_detail_id", nullable = false)
+    private Long constructionDetailId;
+
+    @Column(name = "image_name", nullable = false)
+    private String imageName;
+
+    @Column(name = "image_path", nullable = true)
+    private String imagePath;
+
+    @Column(name = "status", nullable = true)
+    private Long status;
+
+    @Column(name = "reject_reason", nullable = true)
+    private String rejectReason;
+
+    @Column(name = "reject_datetime", nullable = true)
+    private LocalDateTime rejectDatetime;
+
+    @Column(name = "reject_by", nullable = true)
+    private String rejectBy;
+
+    @Column(name = "approved_datetime", nullable = true)
+    private LocalDateTime approvedDatetime;
+
+    @Column(name = "approved_by", nullable = true)
+    private String approvedBy;
+
+    @Column(name = "description", nullable = true)
+    private String description;
+
+    @Override
+    public BaseFWDTO toDTO() {
+        return null;
+    }
+}

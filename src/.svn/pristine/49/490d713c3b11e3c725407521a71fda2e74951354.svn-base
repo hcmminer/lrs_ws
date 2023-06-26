@@ -1,0 +1,76 @@
+package com.viettel.base.cms.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.springframework.stereotype.Component;
+
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import java.util.List;
+
+@Data
+// causes Lombok to implement the Builder design pattern for the Pojo class.
+// usage can be seen in DefaultBeersLoader.java -> createNewBeer() method.
+@Builder
+// causes Lombok to generate a constructor with no parameters.
+@NoArgsConstructor
+// causes Lombok to generate a constructor with 1 parameter for each field in your class.
+@AllArgsConstructor
+@Component
+@Entity
+public class BTSStationDTO {
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
+    private String siteOnContract;
+    private String siteOnNims;
+    private String latitude;
+    private String longitude;
+    private String name;
+    private String address;
+    private String province;
+    private String district;
+    private String telephone;
+    private String contractNo;
+    private Long periodOfRent;
+    private String startDateContract;
+    private String endDateContract;
+    private String signDateContract;
+    private String btsAiredDate;
+    private Long rentalFee;
+    private String paymentTime;
+    private String fileContract;
+    private String fileCR;
+    private Long hasElectricity;
+    private Long approvedStatus;
+    private Long status;
+    private String turnOffDate;
+    private String createdUser;
+    private String createdDate;
+    private String lastModifiedUser;
+    private String lastModifiedDate;
+    private Long hasCRFile;
+    private Long hasContractFile;
+    private String startDatePayment;
+    private String endDatePayment;
+    private String provinceName;
+    private String districtName;
+    private String approvedStatusName;
+    private String statusName;
+    private String fileCRBase64;
+    private String fileContractBase64;
+    private String notes;
+    private Long amount;
+    private String provinceCode;
+    private Long aprroved;
+    private String fileContractName;
+    private String fileContractPath;
+    private String fileCRName;
+    private String fileCRPath;
+
+}
+

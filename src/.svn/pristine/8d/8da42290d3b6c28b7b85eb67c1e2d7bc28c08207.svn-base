@@ -1,0 +1,11 @@
+#Cấu hình restart process
+SLEEP_CONFIG_TIME = 60000
+RUN_CONFIG_TIME=2
+
+CHANEL=369
+APP_ID=
+
+LINK_SERVICE=http://10.120.53.114:8888/vcgw?wsdl
+USER_NAME=Merchant
+PASSWORD=Merchant@2022!@#   
+TIME_OUT_API=30000

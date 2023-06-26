@@ -1,0 +1,245 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.viettel.base.cms.serviceImpl;
+
+import com.viettel.base.cms.common.Constant;
+import com.viettel.base.cms.dto.OptionSetValueDTO;
+import com.viettel.base.cms.model.OptionSetValue;
+import com.viettel.base.cms.repo.*;
+import com.viettel.base.cms.service.OptionSetValueService;
+import com.viettel.vfw5.base.utils.StringUtils;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+/**
+ *
+ * @author ADMIN
+ */
+@Service
+public class OptionSetValueServiceImpl implements OptionSetValueService {
+
+    @Autowired
+    OptionSetValueRepo repo;
+
+    @Autowired
+    @PersistenceContext(unitName = Constant.UNIT_NAME_ENTITIES_CMS)
+    private EntityManager cms;
+
+    /*
+    HieuNT phase 2
+     */
+    @Override
+    public List<OptionSetValueDTO> getListByOptionSet(String optionSetCode, String language, String roleCode) throws Exception {
+        try {
+            List<OptionSetValueDTO> lstResult = new ArrayList<>();
+            StringBuilder sql = new StringBuilder();
+            sql.append(" SELECT   osv.option_set_value_id, "
+                    + "         osv.name, "
+                    + "         osv.description ,  osv.value "
+                    + "  FROM   option_set os, option_set_value osv"
+                    + " WHERE       osv.option_set_id = os.option_set_id "
+                    + "         AND os.option_set_code = :optionSetCode"
+                    + "         AND os.status = 1 "
+                    + "         AND osv.status = 1 ");
+            if (!StringUtils.isNullOrEmpty(language)) {
+                sql.append("	AND osv.`LANGUAGE` = :language ");
+            }
+            if (!StringUtils.isStringNullOrEmpty(roleCode)) {
+                if (Constant.CMS_ROLES.CMS_CORP_STAFF.equals(roleCode)) {
+                    sql.append(" AND value in (0,1,2,3,4) ");
+                }
+                if (Constant.CMS_ROLES.CMS_PROV_VICE_PRESIDENT.equals(roleCode)) {
+                    sql.append(" AND value in (2,3,4) ");
+                }
+                if (Constant.CMS_ROLES.CMS_PROV_INFA_STAFF.equals(roleCode) || Constant.CMS_ROLES.CMS_PROV_TECH_STAFF.equals(roleCode)) {
+                    sql.append(" AND value in (3,4) ");
+                }
+            }
+            sql.append(" ORDER BY   osv.name ASC ");
+
+            Query query = cms.createNativeQuery(sql.toString());
+            if (!StringUtils.isNullOrEmpty(language)) {
+                query.setParameter("language", language);
+            }
+            query.setParameter("optionSetCode", optionSetCode);
+            List<Object[]> lst = query.getResultList();
+            if (!lst.isEmpty() && lst != null) {
+                for (Object[] obj : lst) {
+                    OptionSetValueDTO option = new OptionSetValueDTO();
+                    option.setOptionSetValueId(Long.valueOf(obj[0].toString()));
+                    option.setName(obj[1].toString());
+                    if (obj[2] != null) {
+                        option.setDescription(obj[2].toString());
+                    }
+                    option.setValue(obj[3].toString());
+                    lstResult.add(option);
+                }
+            }
+            return lstResult;
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+
+    }
+
+    @Override
+    public String getOptionSetValueNameByValue(Long value, String optionSetCode, String language) throws Exception {
+        try {
+            String name = "";
+            String sql = "SELECT "
+                    + "  *  "
+                    + "FROM "
+                    + "  option_set_value osv, "
+                    + "  option_set os  "
+                    + "WHERE "
+                    + "  osv.option_set_id = os.option_set_id  "
+                    + "  AND os.option_set_code = :optionSetCode  "
+                    + "  AND osv.STATUS = 1 AND osv.value = :value and os.status = 1";
+            if (!StringUtils.isNullOrEmpty(language)) {
+                sql += "	AND osv.`LANGUAGE` = :language ";
+            }
+            Query query = cms.createNativeQuery(sql, OptionSetValue.class);
+            query.setParameter("value", value.toString());
+            query.setParameter("optionSetCode", optionSetCode);
+            if (!StringUtils.isNullOrEmpty(language)) {
+                query.setParameter("language", language);
+            }
+            List<OptionSetValue> list = query.getResultList();
+
+            if (list.size() > 0) {
+                if (!StringUtils.isStringNullOrEmpty(list.get(0))) {
+                    name = list.get(0).getName();
+                }
+            }
+            return name;
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    @Override
+    public Long getOptionSetValueNameByName(String name, String optionsetCode) throws Exception {
+        try {
+            Long value = null;
+            String sql = "SELECT "
+                    + "  osv.value  "
+                    + "FROM "
+                    + "  option_set_value osv, "
+                    + "  option_set os  "
+                    + "WHERE "
+                    + "  osv.option_set_id = os.option_set_id  "
+                    + "  AND os.option_set_code = :optionSetCode  "
+                    + "  AND osv.STATUS = 1 AND osv.name = :name and os.status = 1";
+            Query query = cms.createNativeQuery(sql);
+            query.setParameter("name", name);
+            query.setParameter("optionSetCode", optionsetCode);
+            Object singleResult = query.getSingleResult();
+            if (!StringUtils.isStringNullOrEmpty(singleResult)) {
+                value = Long.valueOf(singleResult.toString());
+            }
+            return value;
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    @Override
+    public OptionSetValue getListByOptionSetValueName(String optionSetCode, String language, String optionSetValueName) throws Exception {
+        OptionSetValue optionSetValue = new OptionSetValue();
+        try {
+            List<OptionSetValue> lstResult = new ArrayList<>();
+            StringBuilder sql = new StringBuilder();
+            sql.append(" SELECT   * "
+                    + "  FROM   option_set os, option_set_value osv"
+                    + " WHERE       osv.option_set_id = os.option_set_id "
+                    + "         AND os.option_set_code = :optionSetCode"
+                    + "         AND osv.LANGUAGE = :language "
+                    + "         AND osv.name = :optionSetValueName "
+                    + "         AND os.status = 1 "
+                    + "         AND osv.status = 1 ORDER BY osv.name ASC");
+            Query query = cms.createNativeQuery(sql.toString(), OptionSetValue.class
+            );
+            query.setParameter("language", language);
+            query.setParameter("optionSetCode", optionSetCode);
+            query.setParameter("optionSetValueName", optionSetValueName);
+            lstResult = query.getResultList();
+            if (!lstResult.isEmpty()) {
+                optionSetValue = lstResult.get(0);
+            } else {
+                optionSetValue = null;
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+        return optionSetValue;
+    }
+
+    @Override
+    public List<OptionSetValueDTO> getListByOptionSetOrderById(String optionSetCode, String language, String roleCode) throws Exception {
+        try {
+            List<OptionSetValueDTO> lstResult = new ArrayList<>();
+            StringBuilder sql = new StringBuilder();
+            sql.append(" SELECT   osv.option_set_value_id, "
+                    + "         osv.name, "
+                    + "         osv.description ,  osv.value "
+                    + "  FROM   option_set os, option_set_value osv"
+                    + " WHERE       osv.option_set_id = os.option_set_id "
+                    + "         AND os.option_set_code = :optionSetCode"
+                    + "         AND os.status = 1 "
+                    + "         AND osv.status = 1 ");
+            if (!StringUtils.isNullOrEmpty(language)) {
+                sql.append("	AND osv.`LANGUAGE` = :language ");
+            }
+            if (!StringUtils.isStringNullOrEmpty(roleCode)) {
+                if (Constant.CMS_ROLES.CMS_CORP_STAFF.equals(roleCode)) {
+                    sql.append(" AND value in (0,1,2,3,4) ");
+                }
+                if (Constant.CMS_ROLES.CMS_PROV_VICE_PRESIDENT.equals(roleCode)) {
+                    sql.append(" AND value in (2,3,4) ");
+                }
+                if (Constant.CMS_ROLES.CMS_PROV_INFA_STAFF.equals(roleCode) || Constant.CMS_ROLES.CMS_PROV_TECH_STAFF.equals(roleCode)) {
+                    sql.append(" AND value in (3,4) ");
+                }
+            }
+            sql.append(" ORDER BY   osv.value ASC ");
+
+            Query query = cms.createNativeQuery(sql.toString());
+            if (!StringUtils.isNullOrEmpty(language)) {
+                query.setParameter("language", language);
+            }
+            query.setParameter("optionSetCode", optionSetCode);
+            List<Object[]> lst = query.getResultList();
+            if (!lst.isEmpty() && lst != null) {
+                for (Object[] obj : lst) {
+                    OptionSetValueDTO option = new OptionSetValueDTO();
+                    option.setOptionSetValueId(Long.valueOf(obj[0].toString()));
+                    option.setName(obj[1].toString());
+                    if (obj[2] != null) {
+                        option.setDescription(obj[2].toString());
+                    }
+                    option.setValue(obj[3].toString());
+                    lstResult.add(option);
+                }
+            }
+            return lstResult;
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+}

@@ -1,0 +1,18 @@
+package com.viettel.base.cms.service;
+
+import com.viettel.base.cms.dto.ImageDTO;
+
+import java.util.List;
+
+public interface FileUploadService {
+
+    void uploadImage(List<ImageDTO> imageDTO, Long constructionDetailId) throws Exception;
+
+    List<ImageDTO> getImageList(Long constructionDetailId) throws Exception;
+
+    List<ImageDTO> getImageListWithContent(Long constructionDetailId) throws Exception;
+
+    ImageDTO getImage(Long imageId) throws Exception;
+
+    void deactivateOldImageInfo(Long imageId) throws Exception;
+}

@@ -1,0 +1,546 @@
+package com.viettel.base.cms.serviceImpl;
+
+import com.viettel.base.cms.common.Constant;
+import com.viettel.base.cms.dto.CommonInputDTO;
+import com.viettel.base.cms.dto.ConstructionDTO;
+import com.viettel.base.cms.dto.ConstructionDetailDTO;
+import com.viettel.base.cms.dto.ImageDTO;
+import com.viettel.base.cms.dto.SmsDTO;
+import com.viettel.base.cms.model.*;
+import com.viettel.base.cms.repo.ActionLogDetailRepo;
+import com.viettel.base.cms.repo.ActionLogRepo;
+import com.viettel.base.cms.repo.ConstructionDetailRepo;
+import com.viettel.base.cms.repo.ConstructionRepo;
+import com.viettel.base.cms.service.ConstructionManagementService;
+import com.viettel.base.cms.service.ConstructionService;
+import com.viettel.base.cms.service.FileUploadService;
+import com.viettel.base.cms.service.OptionSetValueService;
+import com.viettel.base.cms.utils.FunctionUtils;
+import com.viettel.base.cms.utils.SmsUtils;
+import com.viettel.vfw5.base.utils.DataUtils;
+import com.viettel.vfw5.base.utils.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.core.env.Environment;
+
+@Service
+public class ConstructionManagementServiceImpl implements ConstructionManagementService {
+
+    @Autowired
+    @PersistenceContext(unitName = Constant.UNIT_NAME_ENTITIES_CMS)
+    private EntityManager cms;
+
+    @Autowired
+    ConstructionRepo constructionRepo;
+
+    @Autowired
+    ConstructionService constructionService;
+
+    @Autowired
+    OptionSetValueService optionSetValueService;
+
+    @Autowired
+    ConstructionDetailRepo constructionDetailRepo;
+
+    @Autowired
+    FileUploadService fileUploadService;
+
+    @Autowired
+    ActionLogRepo actionLogRepo;
+
+    @Autowired
+    ActionLogDetailRepo actionLogDetailRepo;
+
+    @Autowired
+    Environment env;
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void updateConstructionStartDate(CommonInputDTO commonInputDTO) throws Exception {
+        try {
+            StringBuilder sql = new StringBuilder();
+            sql.append("UPDATE   construction "
+                    + "   SET   start_date = :startDate, "
+                    + "         start_by = :userName, "
+                    + "         last_modified_date = :updateDate, "
+                    + "         last_modified_by = :userName, "
+                    + "         status = :statusActive "
+                    + " WHERE   construction_id = :constructionId AND status = :statusAssigned ");
+            Query query = cms.createNativeQuery(sql.toString());
+            query.setParameter("startDate", commonInputDTO.getConstructionDTO().getStartDate());
+            query.setParameter("userName", commonInputDTO.getUserName().split("----")[0]);
+            query.setParameter("updateDate", commonInputDTO.getConstructionDTO().getLastModifiedDate());
+            query.setParameter("statusActive", Constant.CONSTRUCTION.STATUS_ACTIVE);
+            query.setParameter("constructionId", commonInputDTO.getConstructionDTO().getConstructionId());
+            query.setParameter("statusAssigned", Constant.CONSTRUCTION.STATUS_ASSIGNED);
+            query.executeUpdate();
+            /*
+            ghi log
+             */
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void updateConstructionItemStartDate(CommonInputDTO commonInputDTO) throws Exception {
+        try {
+            StringBuilder sql = new StringBuilder();
+            sql.append("UPDATE   construction_detail "
+                    + "   SET   start_date = :startdate, status = :statusUpdate, start_by = :startBy "
+                    + " WHERE   construction_detail_id = :constructionDetailId AND status = :oldStatus ");
+            Query query = cms.createNativeQuery(sql.toString());
+            query.setParameter("startdate", commonInputDTO.getConstructionDetailDTO().getStartDate());
+            query.setParameter("statusUpdate", commonInputDTO.getConstructionDetailDTO().getStatus());
+            query.setParameter("startBy", commonInputDTO.getConstructionDetailDTO().getStartBy());
+            query.setParameter("constructionDetailId", commonInputDTO.getConstructionDetailDTO().getConstructionDetailId());
+            query.setParameter("oldStatus", Constant.CONSTRUCTION_DETAIL.STATUS_CREATED);
+            query.executeUpdate();
+            // Gui tin nhan cho KTT khi nhập ngày thi công hoàn tất
+            // 1. Lay mau tin nhan
+            OptionSetValue template = optionSetValueService.getListByOptionSetValueName(Constant.SMS_CONFIG.SMS, commonInputDTO.getLanguage(), Constant.SMS_CONFIG.KTT_START_MONITOR);
+            if (template != null) {
+                // 2. Gui tin nhan thong bao cho KTT
+                SmsDTO smsDTO = new SmsDTO();
+                smsDTO.setConstructionId(commonInputDTO.getConstructionDTO().getConstructionId());
+                String message = String.format(template.getValue(), commonInputDTO.getConstructionDTO().getConstructionCode() + " - " + commonInputDTO.getConstructionDTO().getConstructionName(), commonInputDTO.getConstructionDetailDTO().getName());
+                smsDTO.setMessage(message);
+                smsDTO.setUserRole(Constant.CMS_ROLES.CMS_PROV_TECH_STAFF);
+                SmsUtils.sendSMSForUser(smsDTO, cms, env);
+            }
+            /*
+            ghi log
+             */
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void createApproveRequest(CommonInputDTO commonInputDTO, Staff staff) throws Exception {
+        try {
+            for (ConstructionDetailDTO cd
+                    : commonInputDTO.getListConstructionDetail()) {
+                LocalDateTime dateNow = LocalDateTime.now();
+                String userName  = commonInputDTO.getUserName().split("----")[0];
+                if ("true".equals(cd.getIsRequested())) {
+//                cd.setImagePath(fileUploadService.uploadImage(cd));
+//                    cd.setStatus(Long.valueOf(Constant.CONSTRUCTION_DETAIL.STATUS_REQUESTED));
+                    cd.setAcceptanceBy(userName);
+                    cd.setAcceptanceDate(dateNow);
+
+                    ConstructionDetail constructionDetail = getConstructionDetailById(cd.getConstructionDetailId());
+                    constructionDetail.setAcceptanceBy(userName);
+                    constructionDetail.setAcceptanceDate(dateNow);
+                    updateConstructionDetail(constructionDetail);
+
+
+//                    ConstructionDetail constructionDetail = getConstructionDetailById(cd.getConstructionDetailId());
+                    Long idActionLog = DataUtils.getSequence(cms, "ACTION_LOG_SEQ");
+                    ActionLog actionLog = FunctionUtils.saveActionLog(staff, "CREATE_APPROVE_REQUEST", idActionLog);
+                    actionLogRepo.save(actionLog);
+
+                    if (constructionDetail.getStatus() == Constant.CONSTRUCTION_DETAIL.STATUS_REJECTED_1) {
+                        insertLogForRejectedConstructionDetail(constructionDetail,
+                                idActionLog,
+                                    "first_reject_date",
+                                FunctionUtils.localDateTimeToString(constructionDetail.getFirstRejectDate(),Constant.DATETIME_PATTERN_DMY),
+                                "null");
+                        insertLogForRejectedConstructionDetail(constructionDetail,
+                                idActionLog,
+                                "first_reject_by",
+                                constructionDetail.getFirstRejectBy(),
+                                "null");
+                        insertLogForRejectedConstructionDetail(constructionDetail,
+                                idActionLog,
+                                "first_reject_reason",
+                                constructionDetail.getFirstRejectReason(),
+                                "null");
+                    }
+                    if (constructionDetail.getStatus() == Constant.CONSTRUCTION_DETAIL.STATUS_REJECTED_2) {
+                        insertLogForRejectedConstructionDetail(constructionDetail,
+                                idActionLog,
+                                "second_reject_date",
+                                FunctionUtils.localDateTimeToString(constructionDetail.getSecondRejectDate(),Constant.DATETIME_PATTERN_DMY),
+                                "null");
+                        insertLogForRejectedConstructionDetail(constructionDetail,
+                                idActionLog,
+                                "second_reject_by",
+                                constructionDetail.getSecondRejectBy(),
+                                "null");
+                        insertLogForRejectedConstructionDetail(constructionDetail,
+                                idActionLog,
+                                "second_reject_reason",
+                                constructionDetail.getSecondRejectReason(),
+                                "null");
+                        insertLogForRejectedConstructionDetail(constructionDetail,
+                                idActionLog,
+                                "first_approved_date",
+                                FunctionUtils.localDateTimeToString(constructionDetail.getFirstApprovedDate(),Constant.DATETIME_PATTERN_DMY),
+                                "null");
+                        insertLogForRejectedConstructionDetail(constructionDetail,
+                                idActionLog,
+                                "first_approved_by",
+                                constructionDetail.getFirstApprovedBy(),
+                                "null");
+
+
+                    }
+                    if (constructionDetail.getStatus() == Constant.CONSTRUCTION_DETAIL.STATUS_REJECTED_3) {
+                        insertLogForRejectedConstructionDetail(constructionDetail,
+                                idActionLog,
+                                "third_reject_date",
+                                FunctionUtils.localDateTimeToString(constructionDetail.getThirdRejectDate(),Constant.DATETIME_PATTERN_DMY),
+                                "null");
+                        insertLogForRejectedConstructionDetail(constructionDetail,
+                                idActionLog,
+                                "third_reject_by",
+                                constructionDetail.getThirdRejectBy(),
+                                "null");
+                        insertLogForRejectedConstructionDetail(constructionDetail,
+                                idActionLog,
+                                "third_reject_reason",
+                                constructionDetail.getThirdRejectReason(),
+                                "null");
+                        insertLogForRejectedConstructionDetail(constructionDetail,
+                                idActionLog,
+                                "first_approved_date",
+                                FunctionUtils.localDateTimeToString(constructionDetail.getFirstApprovedDate(),Constant.DATETIME_PATTERN_DMY),
+                                "null");
+                        insertLogForRejectedConstructionDetail(constructionDetail,
+                                idActionLog,
+                                "first_approved_by",
+                                constructionDetail.getFirstApprovedBy(),
+                                "null");
+                        insertLogForRejectedConstructionDetail(constructionDetail,
+                                idActionLog,
+                                "second_approved_date",
+                                FunctionUtils.localDateTimeToString(constructionDetail.getSecondApprovedDate(),Constant.DATETIME_PATTERN_DMY),
+                                "null");
+                        insertLogForRejectedConstructionDetail(constructionDetail,
+                                idActionLog,
+                                "second_approved_by",
+                                constructionDetail.getSecondApprovedBy(),
+                                "null");
+                    }
+
+
+
+                    // Gui tin nhan cho HTT khi gửi yêu cầu phê duyệt hạng mục hoàn tất
+                    // 1. Lay mau tin nhan
+                    OptionSetValue template = optionSetValueService.getListByOptionSetValueName(Constant.SMS_CONFIG.SMS, commonInputDTO.getLanguage(), Constant.SMS_CONFIG.REQUEST_APPROVE);
+                    if (template != null) {
+                        // 2. Gui tin nhan thong bao cho HTT
+                        SmsDTO smsDTO = new SmsDTO();
+                        smsDTO.setConstructionId(commonInputDTO.getConstructionDTO().getConstructionId());
+                        String message = String.format(template.getValue(), commonInputDTO.getConstructionDTO().getConstructionCode() + " - " + commonInputDTO.getConstructionDTO().getConstructionName(), cd.getName(), userName, DataUtils.getStringDateTime(dateNow));
+                        smsDTO.setMessage(message);
+                        smsDTO.setUserRole(Constant.CMS_ROLES.CMS_PROV_INFA_STAFF);
+                        SmsUtils.sendSMSForUser(smsDTO, cms, env);
+                    }
+                }
+//                else {
+//                    fileUploadService.deactivateOldImageInfo(cd.get);
+//                }
+
+            }
+            /*
+            ghi log
+             */
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+
+    }
+
+    void insertLogForRejectedConstructionDetail(ConstructionDetail cd, Long idActionLog, String colName, String oldValue, String newValue){
+        Long idActionLogDetailUser = DataUtils.getSequence(cms, "ACTION_LOG_DETAIL_SEQ");
+        ActionLogDetail actionLogDetail = FunctionUtils.saveActionLogDetail("CONSTRUCTION_DETAIL",
+                cd.getConstructionDetailId(),
+                colName,
+                oldValue,
+                newValue,
+                idActionLog,
+                idActionLogDetailUser);
+        actionLogDetailRepo.save(actionLogDetail);
+    }
+
+    //
+//    @Override
+//    public List<ImageDTO> getImageList(ConstructionDetail constructionDetail) throws Exception {
+//        try {
+//            return fileUploadService.getImageList(constructionDetail);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            throw e;
+//        }
+//    }
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void approveConstructionItem(CommonInputDTO commonInputDTO) throws Exception {
+        try {
+            ConstructionDetail constructionDetail = getConstructionDetailById(commonInputDTO.getConstructionDetailDTO().getConstructionDetailId());
+            LocalDateTime dateNow = LocalDateTime.now();
+            OptionSetValue templateApprove = optionSetValueService.getListByOptionSetValueName(Constant.SMS_CONFIG.SMS, commonInputDTO.getLanguage(), Constant.SMS_CONFIG.APPROVE_SMS);
+            OptionSetValue templateRequestApprove = optionSetValueService.getListByOptionSetValueName(Constant.SMS_CONFIG.SMS, commonInputDTO.getLanguage(), Constant.SMS_CONFIG.REQUEST_APPROVE);
+            OptionSetValue templateReject = optionSetValueService.getListByOptionSetValueName(Constant.SMS_CONFIG.SMS, commonInputDTO.getLanguage(), Constant.SMS_CONFIG.REJECT_SMS);
+            String userName = commonInputDTO.getUserName().split("----")[0];
+            if (Constant.APPROVE_TYPE.APPROVE == commonInputDTO.getConstructionDetailDTO().getApproveType()) {
+                if (Constant.CONSTRUCTION_DETAIL.STATUS_REQUESTED == constructionDetail.getStatus()) {
+                    constructionDetail.setFirstApprovedDate(dateNow);
+                    constructionDetail.setFirstApprovedBy(userName);
+                    constructionDetail.setStatus(Long.valueOf(Constant.CONSTRUCTION_DETAIL.STATUS_ACCEPTED_1));
+
+                    // Gui tin nhan khi phê duyệt hạng mục hoàn tất cho nhan vien KTT
+                    if (templateApprove != null) {
+                        SmsDTO smsDTO = new SmsDTO();
+                        smsDTO.setConstructionId(commonInputDTO.getConstructionDTO().getConstructionId());
+                        String message = String.format(templateApprove.getValue(), commonInputDTO.getConstructionDTO().getConstructionCode() + " - " + commonInputDTO.getConstructionDTO().getConstructionName(), commonInputDTO.getConstructionDetailDTO().getName(), userName, DataUtils.getStringDateTime(dateNow));
+                        smsDTO.setMessage(message);
+                        smsDTO.setUserRole(Constant.CMS_ROLES.CMS_PROV_TECH_STAFF);
+                        SmsUtils.sendSMSForUser(smsDTO, cms, env);
+                    }
+
+                    // Gui tin nhan gửi yêu cầu phê duyệt hạng mục cho PGĐ CN
+                    if (templateRequestApprove != null) {
+                        SmsDTO smsDTO = new SmsDTO();
+                        smsDTO.setConstructionId(commonInputDTO.getConstructionDTO().getConstructionId());
+                        String message = String.format(templateRequestApprove.getValue(), commonInputDTO.getConstructionDTO().getConstructionCode() + " - " + commonInputDTO.getConstructionDTO().getConstructionName(), commonInputDTO.getConstructionDetailDTO().getName(), userName, DataUtils.getStringDateTime(dateNow));
+                        smsDTO.setMessage(message);
+                        smsDTO.setUserRole(Constant.CMS_ROLES.CMS_PROV_VICE_PRESIDENT);
+                        SmsUtils.sendSMSForUser(smsDTO, cms, env);
+                    }
+
+                } else if (Constant.CONSTRUCTION_DETAIL.STATUS_ACCEPTED_1 == constructionDetail.getStatus()) {
+                    constructionDetail.setSecondApprovedDate(dateNow);
+                    constructionDetail.setSecondApprovedBy(userName);
+                    constructionDetail.setStatus(Long.valueOf(Constant.CONSTRUCTION_DETAIL.STATUS_ACCEPTED_2));
+
+                    // Gui tin nhan khi phê duyệt hạng mục hoàn tất cho nhan vien HTT
+                    if (templateApprove != null) {
+                        SmsDTO smsDTO = new SmsDTO();
+                        smsDTO.setConstructionId(commonInputDTO.getConstructionDTO().getConstructionId());
+                        String message = String.format(templateApprove.getValue(), commonInputDTO.getConstructionDTO().getConstructionCode() + " - " + commonInputDTO.getConstructionDTO().getConstructionName(), commonInputDTO.getConstructionDetailDTO().getName(), userName, DataUtils.getStringDateTime(dateNow));
+                        smsDTO.setMessage(message);
+                        smsDTO.setUserRole(Constant.CMS_ROLES.CMS_PROV_INFA_STAFF);
+                        SmsUtils.sendSMSForUser(smsDTO, cms, env);
+                    }
+
+                    // Gui tin nhan gửi yêu cầu phê duyệt hạng mục cho NV TCT
+                    if (templateRequestApprove != null) {
+                        SmsDTO smsDTO = new SmsDTO();
+                        smsDTO.setConstructionId(commonInputDTO.getConstructionDTO().getConstructionId());
+                        String message = String.format(templateRequestApprove.getValue(), commonInputDTO.getConstructionDTO().getConstructionCode() + " - " + commonInputDTO.getConstructionDTO().getConstructionName(), commonInputDTO.getConstructionDetailDTO().getName(), userName, DataUtils.getStringDateTime(dateNow));
+                        smsDTO.setMessage(message);
+                        smsDTO.setUserRole(Constant.CMS_ROLES.CMS_CORP_STAFF);
+                        SmsUtils.sendSMSForUser(smsDTO, cms, env);
+                    }
+                } else if (Constant.CONSTRUCTION_DETAIL.STATUS_ACCEPTED_2 == constructionDetail.getStatus()) {
+                    constructionDetail.setThirdApprovedDate(dateNow);
+                    constructionDetail.setThirdApprovedBy(userName);
+                    constructionDetail.setStatus(Long.valueOf(Constant.CONSTRUCTION_DETAIL.STATUS_ACCEPTED_3));
+                    OptionSetValue templateFinish = optionSetValueService.getListByOptionSetValueName(Constant.SMS_CONFIG.SMS, commonInputDTO.getLanguage(), Constant.SMS_CONFIG.ACCEPTANCE_SMS);
+                    // Gui tin nhan khi phê duyệt hạng mục hoàn tất cho nhan vien HTT
+                    if (templateFinish != null) {
+                        // Gui tin nhan cho PGD
+                        SmsDTO smsDTO = new SmsDTO();
+                        smsDTO.setConstructionId(commonInputDTO.getConstructionDTO().getConstructionId());
+                        String message = String.format(templateFinish.getValue(), commonInputDTO.getConstructionDTO().getConstructionCode() + " - " + commonInputDTO.getConstructionDTO().getConstructionName(), commonInputDTO.getConstructionDetailDTO().getName(), userName, DataUtils.getStringDateTime(dateNow));
+                        smsDTO.setMessage(message);
+                        smsDTO.setUserRole(Constant.CMS_ROLES.CMS_PROV_VICE_PRESIDENT);
+                        SmsUtils.sendSMSForUser(smsDTO, cms, env);
+
+                        // Gui tin nhan cho HTT
+                        SmsDTO smsDTOHtt = new SmsDTO();
+                        smsDTOHtt.setConstructionId(commonInputDTO.getConstructionDTO().getConstructionId());
+                        message = String.format(templateFinish.getValue(), commonInputDTO.getConstructionDTO().getConstructionCode() + " - " + commonInputDTO.getConstructionDTO().getConstructionName(), commonInputDTO.getConstructionDetailDTO().getName(), userName, DataUtils.getStringDateTime(dateNow));
+                        smsDTOHtt.setMessage(message);
+                        smsDTOHtt.setUserRole(Constant.CMS_ROLES.CMS_PROV_INFA_STAFF);
+                        SmsUtils.sendSMSForUser(smsDTOHtt, cms, env);
+
+                        // Gui tin nhan cho KTT
+                        SmsDTO smsDTOKtt = new SmsDTO();
+                        smsDTOKtt.setConstructionId(commonInputDTO.getConstructionDTO().getConstructionId());
+                        message = String.format(templateApprove.getValue(), commonInputDTO.getConstructionDTO().getConstructionCode() + " - " + commonInputDTO.getConstructionDTO().getConstructionName(), commonInputDTO.getConstructionDetailDTO().getName(), userName, DataUtils.getStringDateTime(dateNow));
+                        smsDTOKtt.setMessage(message);
+                        smsDTOKtt.setUserRole(Constant.CMS_ROLES.CMS_PROV_TECH_STAFF);
+                        SmsUtils.sendSMSForUser(smsDTOKtt, cms, env);
+                    }
+
+                }
+            }
+            if (Constant.APPROVE_TYPE.REJECT == commonInputDTO.getConstructionDetailDTO().getApproveType()) {
+                if (Constant.CONSTRUCTION_DETAIL.STATUS_REQUESTED == constructionDetail.getStatus()) {
+                    constructionDetail.setFirstRejectDate(dateNow);
+                    constructionDetail.setFirstRejectBy(userName);
+                    constructionDetail.setStatus(Long.valueOf(Constant.CONSTRUCTION_DETAIL.STATUS_REJECTED_1));
+                    constructionDetail.setFirstRejectReason(commonInputDTO.getConstructionDetailDTO().getRejectReason());
+
+                    // Gui tin nhan khi từ chối hạng mục cho nhan vien KTT
+                    if (templateReject != null) {
+                        SmsDTO smsDTO = new SmsDTO();
+                        smsDTO.setConstructionId(commonInputDTO.getConstructionDTO().getConstructionId());
+                        String message = String.format(templateReject.getValue(), commonInputDTO.getConstructionDTO().getConstructionCode() + " - " + commonInputDTO.getConstructionDTO().getConstructionName(), commonInputDTO.getConstructionDetailDTO().getName(), userName, DataUtils.getStringDateTime(dateNow), commonInputDTO.getConstructionDetailDTO().getRejectReason());
+                        smsDTO.setMessage(message);
+                        smsDTO.setUserRole(Constant.CMS_ROLES.CMS_PROV_TECH_STAFF);
+                        SmsUtils.sendSMSForUser(smsDTO, cms, env);
+                    }
+
+                } else if (Constant.CONSTRUCTION_DETAIL.STATUS_ACCEPTED_1 == constructionDetail.getStatus()) {
+                    constructionDetail.setSecondRejectDate(dateNow);
+                    constructionDetail.setSecondRejectBy(userName);
+                    constructionDetail.setStatus(Long.valueOf(Constant.CONSTRUCTION_DETAIL.STATUS_REJECTED_2));
+                    constructionDetail.setSecondRejectReason(commonInputDTO.getConstructionDetailDTO().getRejectReason());
+
+                    if (templateReject != null) {
+                        // Gui tin nhan khi từ chối hạng mục cho nhan vien HTT
+                        SmsDTO smsDTO = new SmsDTO();
+                        smsDTO.setConstructionId(commonInputDTO.getConstructionDTO().getConstructionId());
+                        String message = String.format(templateReject.getValue(), commonInputDTO.getConstructionDTO().getConstructionCode() + " - " + commonInputDTO.getConstructionDTO().getConstructionName(), commonInputDTO.getConstructionDetailDTO().getName(), userName, DataUtils.getStringDateTime(dateNow), commonInputDTO.getConstructionDetailDTO().getRejectReason());
+                        smsDTO.setMessage(message);
+                        smsDTO.setUserRole(Constant.CMS_ROLES.CMS_PROV_INFA_STAFF);
+                        SmsUtils.sendSMSForUser(smsDTO, cms, env);
+
+                        // Gui tin nhan khi từ chối hạng mục cho nhan vien KTT
+                        SmsDTO smsDTOKTT = new SmsDTO();
+                        smsDTOKTT.setConstructionId(commonInputDTO.getConstructionDTO().getConstructionId());
+                        message = String.format(templateReject.getValue(), commonInputDTO.getConstructionDTO().getConstructionCode() + " - " + commonInputDTO.getConstructionDTO().getConstructionName(), commonInputDTO.getConstructionDetailDTO().getName(), userName, DataUtils.getStringDateTime(dateNow), commonInputDTO.getConstructionDetailDTO().getRejectReason());
+                        smsDTOKTT.setMessage(message);
+                        smsDTOKTT.setUserRole(Constant.CMS_ROLES.CMS_PROV_TECH_STAFF);
+                        SmsUtils.sendSMSForUser(smsDTOKTT, cms, env);
+                    }
+
+                } else if (Constant.CONSTRUCTION_DETAIL.STATUS_ACCEPTED_2 == constructionDetail.getStatus()) {
+                    constructionDetail.setThirdRejectDate(dateNow);
+                    constructionDetail.setThirdRejectBy(userName);
+                    constructionDetail.setStatus(Long.valueOf(Constant.CONSTRUCTION_DETAIL.STATUS_REJECTED_3));
+                    constructionDetail.setThirdRejectReason(commonInputDTO.getConstructionDetailDTO().getRejectReason());
+
+                    if (templateReject != null) {
+                        // Gui tin nhan khi từ chối hạng mục cho nhan vien HTT
+                        SmsDTO smsDTO = new SmsDTO();
+                        smsDTO.setConstructionId(commonInputDTO.getConstructionDTO().getConstructionId());
+                        String message = String.format(templateReject.getValue(), commonInputDTO.getConstructionDTO().getConstructionCode() + " - " + commonInputDTO.getConstructionDTO().getConstructionName(), commonInputDTO.getConstructionDetailDTO().getName(), userName, DataUtils.getStringDateTime(dateNow), commonInputDTO.getConstructionDetailDTO().getRejectReason());
+                        smsDTO.setMessage(message);
+                        smsDTO.setUserRole(Constant.CMS_ROLES.CMS_PROV_INFA_STAFF);
+                        SmsUtils.sendSMSForUser(smsDTO, cms, env);
+
+                        // Gui tin nhan khi từ chối hạng mục cho nhan vien KTT
+                        SmsDTO smsDTOKTT = new SmsDTO();
+                        smsDTOKTT.setConstructionId(commonInputDTO.getConstructionDTO().getConstructionId());
+                        message = String.format(templateReject.getValue(), commonInputDTO.getConstructionDTO().getConstructionCode() + " - " + commonInputDTO.getConstructionDTO().getConstructionName(), commonInputDTO.getConstructionDetailDTO().getName(), userName, DataUtils.getStringDateTime(dateNow), commonInputDTO.getConstructionDetailDTO().getRejectReason());
+                        smsDTOKTT.setMessage(message);
+                        smsDTOKTT.setUserRole(Constant.CMS_ROLES.CMS_PROV_TECH_STAFF);
+                        SmsUtils.sendSMSForUser(smsDTOKTT, cms, env);
+
+                        // Gui tin nhan khi từ chối hạng mục cho PGD CN
+                        SmsDTO smsDTOPGD = new SmsDTO();
+                        smsDTOPGD.setConstructionId(commonInputDTO.getConstructionDTO().getConstructionId());
+                        message = String.format(templateReject.getValue(), commonInputDTO.getConstructionDTO().getConstructionCode() + " - " + commonInputDTO.getConstructionDTO().getConstructionName(), commonInputDTO.getConstructionDetailDTO().getName(), userName, DataUtils.getStringDateTime(dateNow), commonInputDTO.getConstructionDetailDTO().getRejectReason());
+                        smsDTOPGD.setMessage(message);
+                        smsDTOPGD.setUserRole(Constant.CMS_ROLES.CMS_PROV_VICE_PRESIDENT);
+                        SmsUtils.sendSMSForUser(smsDTOPGD, cms, env);
+                    }
+                }
+            }
+
+            constructionDetailRepo.save(constructionDetail);
+
+            /*
+            ghi log
+             */
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    @Override
+    public ConstructionDetail getConstructionDetailById(Long constructionDetailId) throws Exception {
+        try {
+            Optional<ConstructionDetail> result = constructionDetailRepo.findById(constructionDetailId);
+            ConstructionDetail constructionDetail = result.orElse(null);
+            return constructionDetail;
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    @Override
+    public List<ConstructionDetail> getListCDWithStep(Long constructionId, Long step) throws Exception {
+        try {
+            List<ConstructionDetail> result = new ArrayList<>();
+            StringBuilder sql = new StringBuilder();
+            sql.append("SELECT " +
+                    "  cd.*  " +
+                    " FROM " +
+                    "  construction_detail cd, " +
+                    "  construction_item ci  " +
+                    "WHERE " +
+                    "  cd.construction_item_id = ci.construction_item_id  " +
+                    "  AND cd.construction_id = :constructionId  " +
+                    "  AND ci.step < :step " +
+                    "  AND cd.status <> 7 ");
+            Query query = cms.createNativeQuery(sql.toString(), ConstructionDetail.class);
+            query.setParameter("constructionId", constructionId);
+            query.setParameter("step", step);
+//            query.setParameter("status", Constant.CONSTRUCTION_DETAIL.STATUS_ACCEPTED_3);
+            result = query.getResultList();
+            return result;
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    void updateConstructionDetail(ConstructionDetail constructionDetailDTO) {
+        try {
+            StringBuilder sql = new StringBuilder();
+            sql.append("update construction_detail "
+                    + "set "
+                    + "status = :status, acceptance_date =:acceptanceDate, "
+                    + "acceptance_by = :acceptanceBy ");
+            if (constructionDetailDTO.getStatus() == Constant.CONSTRUCTION_DETAIL.STATUS_REJECTED_1) {
+                sql.append(", first_reject_date = NULL, first_reject_by = NULL, first_reject_reason = NULL ");
+            }
+            if (constructionDetailDTO.getStatus() == Constant.CONSTRUCTION_DETAIL.STATUS_REJECTED_2) {
+                sql.append(", first_approved_date = NULL, first_approved_by = NULL, second_reject_date = NULL, second_reject_by = NULL, second_reject_reason = NULL ");
+            }
+            if (constructionDetailDTO.getStatus() == Constant.CONSTRUCTION_DETAIL.STATUS_REJECTED_3) {
+                sql.append(", first_approved_date = NULL, first_approved_by = NULL, second_approved_date = NULL, second_approved_by = NULL, third_reject_date = NULL, third_reject_by = NULL, third_reject_reason = NULL ");
+            }
+            sql.append(" where "
+                    + "construction_detail_id = :constructionDetailId and status = :oldStatus ");
+            Query query = cms.createNativeQuery(sql.toString());
+            query.setParameter("acceptanceDate", constructionDetailDTO.getAcceptanceDate());
+            query.setParameter("acceptanceBy", constructionDetailDTO.getAcceptanceBy());
+//            query.setParameter("imagePath", constructionDetailDTO.getImagePath());
+            query.setParameter("constructionDetailId", constructionDetailDTO.getConstructionDetailId());
+            query.setParameter("status", Constant.CONSTRUCTION_DETAIL.STATUS_REQUESTED);
+            query.setParameter("oldStatus", constructionDetailDTO.getStatus());
+            query.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+}

@@ -1,0 +1,62 @@
+package com.viettel.base.cms.model;
+
+import com.viettel.vfw5.base.dto.BaseFWDTO;
+import com.viettel.vfw5.base.model.BaseFWModel;
+import java.time.LocalDateTime;
+import javax.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.springframework.stereotype.Component;
+
+@Entity
+@Table(name = "action_log")
+// causes Lombok to generate toString(), equals(), hashCode(), getter() & setter(), and Required arguments constructor in one go.
+@Data
+// causes Lombok to implement the Builder design pattern for the Pojo class.
+// usage can be seen in DefaultBeersLoader.java -> createNewBeer() method.
+@Builder
+// causes Lombok to generate a constructor with no parameters.
+@NoArgsConstructor
+// causes Lombok to generate a constructor with 1 parameter for each field in your class.
+@AllArgsConstructor
+@Component
+public class ActionLog extends BaseFWModel {
+
+    @Id
+    @Column(name = "action_log_id", nullable = false)
+//    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "action_log_id_generator")
+//    @SequenceGenerator(name = "action_log_id_generator",
+//            sequenceName = "action_log_seq",
+//            allocationSize = 1)
+    private Long actionLogId;
+//
+//    @Column(name = "merchant_id", nullable = true)
+//    private Long merchantId;
+
+    @Column(name = "staff_id", nullable = true)
+    private Long staffId;
+
+    @Column(name = "isdn", nullable = true)
+    private String isdn;
+
+//    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "create_datetime", nullable = true)
+    private LocalDateTime createDatetime;
+
+    @Column(name = "ip", nullable = true)
+    private String ip;
+
+    @Column(name = "description", nullable = true)
+    private String description;
+
+    @Column(name = "row_id", nullable = true)
+    private Long rowId;
+
+    @Override
+    public BaseFWDTO toDTO() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+}

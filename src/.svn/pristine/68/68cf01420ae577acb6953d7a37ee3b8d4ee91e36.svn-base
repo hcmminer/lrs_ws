@@ -1,0 +1,109 @@
+package com.viettel.base.cms.utils;
+
+import com.viettel.base.cms.common.Constant;
+import com.viettel.base.cms.dto.SmsDTO;
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
+import org.springframework.core.env.Environment;
+
+public class SmsUtils {
+
+    public static void sendSMSForUser(SmsDTO smsDTO, EntityManager cms, Environment env) throws Exception {
+        try {
+            String chanel = env.getProperty("chanel.sms");
+            StringBuilder sql = new StringBuilder();
+            sql.append("insert into mt "
+                    + "	(mt_id, "
+                    + "	msisdn, "
+                    + "	message, "
+                    + "	sent_time, "
+                    + "	retry_num, "
+                    + "	status, "
+                    + "	`type`, "
+                    + "	app_id, "
+                    + "	channel) "
+                    + "select "
+                    + "	nextval(mt_seq), "
+                    + "	concat('856', s.tel_number) , "
+                    + "	:message, "
+                    + "	sysdate() , "
+                    + "	0, "
+                    + "	1, "
+                    + "	:smsType, "
+                    + "	:appId, "
+                    + "	:channel "
+                    + "from "
+                    + "	staff s "
+                    + "where "
+                    + "	s.province_code = ( "
+                    + "	select "
+                    + "		c2.province_code "
+                    + "	from "
+                    + "		construction c2 "
+                    + "	where "
+                    + "		c2.construction_id = :constructionId "
+                    + "		and c2.status <> 0) "
+                    + "	and s.role_code =:roleCode "
+                    + "	and s.status = 1 and s.tel_number is not null");
+            Query query = cms.createNativeQuery(sql.toString());
+            query.setParameter("message", smsDTO.getMessage());
+            query.setParameter("constructionId", smsDTO.getConstructionId());
+            query.setParameter("roleCode", smsDTO.getUserRole());
+            query.setParameter("smsType", Constant.SMS_CONFIG.SMS_TYPE);
+            query.setParameter("appId", Constant.SMS_CONFIG.APP_ID);
+            query.setParameter("channel", chanel);
+            query.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+
+    }
+
+
+    public static void sendSMSForUserBTS(SmsDTO smsDTO, EntityManager cms, Environment env) throws Exception {
+        try {
+            String chanel = env.getProperty("chanel.sms");
+            StringBuilder sql = new StringBuilder();
+            sql.append("insert into mt "
+                    + "	(mt_id, "
+                    + "	msisdn, "
+                    + "	message, "
+                    + "	sent_time, "
+                    + "	retry_num, "
+                    + "	status, "
+                    + "	`type`, "
+                    + "	app_id, "
+                    + "	channel) "
+                    + "select "
+                    + "	nextval(mt_seq), "
+                    + "	concat('856', s.tel_number) , "
+                    + "	:message, "
+                    + "	sysdate() , "
+                    + "	0, "
+                    + "	1, "
+                    + "	:smsType, "
+                    + "	:appId, "
+                    + "	:channel "
+                    + "from "
+                    + "	staff s "
+                    + "where "
+                    + "	s.province_code = :provinceCode "
+                    + "	and s.role_code =:roleCode "
+                    + "	and s.status = 1 and s.tel_number is not null");
+            Query query = cms.createNativeQuery(sql.toString());
+            query.setParameter("message", smsDTO.getMessage());
+            query.setParameter("provinceCode", smsDTO.getProvinceCode());
+            query.setParameter("roleCode", smsDTO.getUserRole());
+            query.setParameter("smsType", Constant.SMS_CONFIG.SMS_TYPE);
+            query.setParameter("appId", Constant.SMS_CONFIG.APP_ID);
+            query.setParameter("channel", chanel);
+            query.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+
+    }
+
+}

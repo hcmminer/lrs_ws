@@ -166,7 +166,7 @@ public class UserServiceImpl implements UserService {
                             || Constant.BTS_ROLES.CMS_BTS_CND_STAFF.equals(loginDTO.getRoleCode())
                             || Constant.BTS_ROLES.CMS_BTS_NOC_STAFF.equals(loginDTO.getRoleCode())
                             || Constant.BTS_ROLES.CMS_BTS_GRAND_TC_STAFF.equals(loginDTO.getRoleCode())) {
-                    if ("QLTBTS".equals(menuParent.getCode()) || "REPORT_BTS".equals(menuParent.getCode())){
+                    if ("QLTBTS".equals(menuParent.getCode()) || "REPORT_BTS".equals(menuParent.getCode()) || "CONFIG_SYSTEM".equals(menuParent.getCode())){
                         sortMenuParent.add(menuParent);
                     }
                 }

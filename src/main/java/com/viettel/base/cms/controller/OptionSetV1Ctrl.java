@@ -1,5 +1,6 @@
 package com.viettel.base.cms.controller;
 
+import com.viettel.base.cms.dto.CommonInputDTO;
 import com.viettel.base.cms.dto.SearchV1DTO;
 import com.viettel.base.cms.model.OptionSetV1;
 import com.viettel.base.cms.repo.OptionSetV1Repo;
@@ -18,12 +19,12 @@ public class OptionSetV1Ctrl {
 
     @PostMapping(value = "/listOptionSet")
     public ExecutionResult listOptionSet(@RequestHeader("Accept-Language") String language,
-                                         @RequestBody SearchV1DTO searchV1DTO) {
+                                         @RequestBody CommonInputDTO commonInputDTO) {
         ExecutionResult res = new ExecutionResult();
         ResourceBundle r = new ResourceBundle(language);
         res.setErrorCode("0");
         try {
-            List<OptionSetV1> optionSetV1DTOList = optionSetV1Repo.findAllByOptionSetCode(searchV1DTO.getOptionSetCode());
+            List<OptionSetV1> optionSetV1DTOList = optionSetV1Repo.findAllByOptionSetId((commonInputDTO.getSearchV1DTO().getOptionSetId()));
             res.setData(optionSetV1DTOList);
             return res;
         } catch (Exception e) {
@@ -33,4 +34,6 @@ public class OptionSetV1Ctrl {
         }
         return res;
     }
+
+
 }

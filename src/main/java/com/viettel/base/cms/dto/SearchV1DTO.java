@@ -19,4 +19,5 @@ import java.time.LocalDateTime;
 @Component
 public class SearchV1DTO {
     private String optionSetCode;
+    private Long optionSetId;
 }

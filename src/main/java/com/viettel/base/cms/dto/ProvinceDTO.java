@@ -11,6 +11,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 /**
@@ -30,9 +31,9 @@ public class ProvinceDTO {
     private Long proId;
     private String proCode;
     private String proName;
-    private String area;
-    private String areaM;
-    private String proGroup;
-    private String centerPoint;
-    private Long defZoom;
+    private Long status;
+    private LocalDateTime createDatetime;
+    private String createBy;
+    private LocalDateTime updateDatetime;
+    private String updateBy;
 }

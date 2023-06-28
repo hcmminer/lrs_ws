@@ -43,5 +43,4 @@ public class CommonInputDTO {
     private Long constructionItemId;
     private List<ImageDTO> imageDTOList;
     private String appCode;
-
 }

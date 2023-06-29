@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "option_set_value")
@@ -37,13 +38,13 @@ public class OptionSetValueV1 {
     private Long status;
 
     @Column(name = "create_datetime")
-    private java.sql.Timestamp createDatetime;
+    private LocalDateTime createDatetime;
 
     @Column(name = "create_by")
     private String createBy;
 
     @Column(name = "update_datetime")
-    private java.sql.Timestamp updateDatetime;
+    private LocalDateTime updateDatetime;
 
     @Column(name = "update_by")
     private String updateBy;

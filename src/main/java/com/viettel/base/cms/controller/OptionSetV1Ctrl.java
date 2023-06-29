@@ -11,6 +11,7 @@ import com.viettel.base.cms.service.UserService;
 import com.viettel.vfw5.base.dto.ExecutionResult;
 import com.viettel.vfw5.base.utils.DataUtils;
 import com.viettel.vfw5.base.utils.ResourceBundle;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,6 +19,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping(value = "/api")
@@ -39,7 +41,7 @@ public class OptionSetV1Ctrl {
         ResourceBundle r = new ResourceBundle(language);
         res.setErrorCode("0");
         try {
-            List<OptionSetV1> optionSetV1DTOList = optionSetV1Repo.findAllByOptionSetId((commonInputDTO.getSearchV1DTO().getOptionSetId()));
+            List<OptionSetV1> optionSetV1DTOList = optionSetV1Repo.findAllByOptionSetIdAndStatus((commonInputDTO.getSearchV1DTO().getOptionSetId()), 1L);
             res.setData(optionSetV1DTOList);
             return res;
         } catch (Exception e) {
@@ -58,16 +60,95 @@ public class OptionSetV1Ctrl {
         res.setErrorCode("0");
         try {
 
+
             OptionSetV1DTO optionSetV1DTO = commonInputDTO.getOptionSetV1DTO();
+            boolean isExists = optionSetV1Repo.existsByOptionSetCodeAndAndStatus(optionSetV1DTO.getOptionSetCode(), 1L);
+            if (isExists) {
+                res.setDescription(r.getResourceMessage("cm.getOptionSetCode.exists"));
+                res.setErrorCode("1");
+                return res;
+            }
+
             OptionSetV1 optionSetV1 = new OptionSetV1();
+
+            BeanUtils.copyProperties(optionSetV1DTO, optionSetV1);
+
             optionSetV1.setOptionSetId(DataUtils.getSequence(cms, "option_set_seq"));
-            optionSetV1.setOptionSetCode(optionSetV1DTO.getOptionSetCode());
-            optionSetV1.setDescription(optionSetV1DTO.getDescription());
             optionSetV1.setCreateBy(commonInputDTO.getUserName().split("----")[0]);
             optionSetV1.setCreateDatetime(LocalDateTime.now());
             optionSetV1.setStatus(1L);
             optionSetV1Repo.save(optionSetV1);
-            res.setDescription("cm.addSuccess");
+            res.setDescription(r.getResourceMessage("cm.addSuccess"));
+            return res;
+        } catch (Exception e) {
+            e.printStackTrace();
+            res.setErrorCode("1");
+            res.setDescription(r.getResourceMessage("system.error"));
+        }
+        return res;
+    }
+
+    @PostMapping(value = "/editOptionSet")
+    public ExecutionResult editOptionSet(@RequestHeader("Accept-Language") String language,
+                                         @RequestBody CommonInputDTO commonInputDTO) {
+        ExecutionResult res = new ExecutionResult();
+        ResourceBundle r = new ResourceBundle(language);
+        res.setErrorCode("0");
+        try {
+            OptionSetV1DTO optionSetV1DTO = commonInputDTO.getOptionSetV1DTO();
+            boolean isExists = optionSetV1Repo.existsByOptionSetCodeAndAndStatus(optionSetV1DTO.getOptionSetCode(), 1L);
+            if (isExists) {
+                res.setDescription(r.getResourceMessage("cm.getOptionSetCode.exists"));
+                res.setErrorCode("1");
+                return res;
+            }
+
+            OptionSetV1 optionSetV1 = new OptionSetV1();
+
+            BeanUtils.copyProperties(optionSetV1DTO, optionSetV1);
+
+            optionSetV1.setCreateBy(commonInputDTO.getUserName().split("----")[0]);
+            optionSetV1.setCreateDatetime(LocalDateTime.now());
+            optionSetV1.setStatus(1L);
+
+            optionSetV1Repo.save(optionSetV1);
+            res.setDescription(r.getResourceMessage("cm.editSuccess"));
+            return res;
+        } catch (Exception e) {
+            e.printStackTrace();
+            res.setErrorCode("1");
+            res.setDescription(r.getResourceMessage("system.error"));
+        }
+        return res;
+    }
+
+    @PostMapping(value = "/delOptionSet")
+    public ExecutionResult delOptionSet(@RequestHeader("Accept-Language") String language,
+                                        @RequestBody CommonInputDTO commonInputDTO) {
+        ExecutionResult res = new ExecutionResult();
+        ResourceBundle r = new ResourceBundle(language);
+        res.setErrorCode("0");
+        try {
+            OptionSetV1DTO optionSetV1DTO = commonInputDTO.getOptionSetV1DTO();
+            boolean isExists = optionSetV1Repo.existsByOptionSetCodeAndAndStatus(optionSetV1DTO.getOptionSetCode(), 1L);
+            if (isExists) {
+                res.setDescription(r.getResourceMessage("cm.getOptionSetCode.exists"));
+                res.setErrorCode("1");
+                return res;
+            }
+
+
+            Optional<OptionSetV1> optionSetV1 = optionSetV1Repo.findById(optionSetV1DTO.getOptionSetId());
+            optionSetV1.ifPresent(item -> {
+                item.setCreateBy(commonInputDTO.getUserName().split("----")[0]);
+                item.setCreateDatetime(LocalDateTime.now());
+                item.setStatus(0L);
+
+                optionSetV1Repo.save(item);
+            });
+
+
+            res.setDescription(r.getResourceMessage("cm.delSuccess"));
             return res;
         } catch (Exception e) {
             e.printStackTrace();

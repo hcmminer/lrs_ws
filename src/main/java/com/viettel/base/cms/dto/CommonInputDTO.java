@@ -43,6 +43,8 @@ public class CommonInputDTO {
     private Long constructionItemId;
     private List<ImageDTO> imageDTOList;
     private String appCode;
+//    bandv..
     private SearchV1DTO searchV1DTO;
     private OptionSetV1DTO optionSetV1DTO;
+//    ..bandv
 }

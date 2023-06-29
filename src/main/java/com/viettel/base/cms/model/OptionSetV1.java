@@ -25,25 +25,25 @@ public class OptionSetV1 {
     @Column(name = "option_set_id")
     private Long optionSetId;
 
-    @Column(name = "option_set_code")
+    @Column(name = "option_set_code",nullable = true)
     private String optionSetCode;
 
-    @Column(name = "status")
+    @Column(name = "status", nullable = true)
     private Long status;
 
-    @Column(name = "create_datetime")
+    @Column(name = "create_datetime", nullable = true)
     private LocalDateTime createDatetime;
 
-    @Column(name = "create_by")
+    @Column(name = "create_by", nullable = true)
     private String createBy;
 
-    @Column(name = "update_datetime")
+    @Column(name = "update_datetime", nullable = true)
     private LocalDateTime updateDatetime;
 
-    @Column(name = "update_by")
+    @Column(name = "update_by", nullable = true)
     private String updateBy;
 
-    @Column(name = "description")
+    @Column(name = "description", nullable = true)
     private String description;
 
 

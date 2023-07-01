@@ -24,15 +24,15 @@ import java.util.Optional;
 @RestController
 @RequestMapping(value = "/api")
 public class OptionSetV1Ctrl {
-    @Autowired
     @PersistenceContext(unitName = Constant.UNIT_NAME_ENTITIES_CMS)
-    private EntityManager cms;
+    private final EntityManager cms;
 
-    @Autowired
-    private OptionSetV1Repo optionSetV1Repo;
+    private final OptionSetV1Repo optionSetV1Repo;
 
-    @Autowired
-    private UserService userService;
+    public OptionSetV1Ctrl(EntityManager cms, OptionSetV1Repo optionSetV1Repo) {
+        this.cms = cms;
+        this.optionSetV1Repo = optionSetV1Repo;
+    }
 
     @PostMapping(value = "/listOptionSet")
     public ExecutionResult listOptionSet(@RequestHeader("Accept-Language") String language,
@@ -41,7 +41,7 @@ public class OptionSetV1Ctrl {
         ResourceBundle r = new ResourceBundle(language);
         res.setErrorCode("0");
         try {
-            List<OptionSetV1> optionSetV1DTOList = optionSetV1Repo.findAllByOptionSetIdAndStatus((commonInputDTO.getSearchV1DTO().getOptionSetId()), 1L);
+            List<OptionSetV1> optionSetV1DTOList = optionSetV1Repo.findAllByOptionSetCodeAndStatus((commonInputDTO.getSearchV1DTO().getOptionSetCode()), 1L);
             res.setData(optionSetV1DTOList);
             return res;
         } catch (Exception e) {

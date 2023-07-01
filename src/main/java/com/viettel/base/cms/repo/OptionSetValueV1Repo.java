@@ -9,8 +9,9 @@ import java.util.List;
 
 @Repository
 public interface OptionSetValueV1Repo extends JpaRepository<OptionSetValueV1, Long> {
-    @Query("select o from OptionSetValueV1 o where  (:optionSetValueId is null or o.optionSetValueId = :optionSetValueId) and (:optionSetId is null  or  o.optionSetId = :optionSetId ) and o.status = :status")
-    List<OptionSetValueV1> findAllByOptionSetValueIdAndOptionSetIdAndStatus(Long optionSetValueId, Long optionSetId, Long status);
+
+    @Query("select o, o2 from OptionSetValueV1 o join OptionSetV1 o2 on o.optionSetId = o2.optionSetId where  (:value is null or o.value like %:value%)  and o.status = :status order by o.createDatetime desc ")
+    List<OptionSetValueV1> findAllByValueAndStatus(String value, Long status);
 
     boolean existsByValueAndStatus(String value, Long status);
 }

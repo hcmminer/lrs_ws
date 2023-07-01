@@ -39,7 +39,7 @@ public class OptionSetValueV1Ctrl {
         ResourceBundle r = new ResourceBundle(language);
         res.setErrorCode("0");
         try {
-            List<OptionSetValueV1> optionSetValueV1DTOList = optionSetValueV1Repo.findAllByOptionSetValueIdAndOptionSetIdAndStatus(commonInputDTO.getSearchV1DTO().getOptionSetValueId(), commonInputDTO.getSearchV1DTO().getOptionSetId(), 1L);
+            List<OptionSetValueV1> optionSetValueV1DTOList = optionSetValueV1Repo.findAllByValueAndStatus(commonInputDTO.getSearchV1DTO().getValue(), 1L);
             res.setData(optionSetValueV1DTOList);
             return res;
         } catch (Exception e) {

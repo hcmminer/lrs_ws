@@ -9,8 +9,10 @@ import com.viettel.base.cms.service.UserService;
 import com.viettel.vfw5.base.dto.ExecutionResult;
 import com.viettel.vfw5.base.utils.DataUtils;
 import com.viettel.vfw5.base.utils.ResourceBundle;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.persistence.EntityManager;
@@ -21,6 +23,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping(value = "/api")
+@Slf4j
 public class OptionSetValueV1Ctrl {
     @Autowired
     @PersistenceContext(unitName = Constant.UNIT_NAME_ENTITIES_CMS)
@@ -39,7 +42,7 @@ public class OptionSetValueV1Ctrl {
         ResourceBundle r = new ResourceBundle(language);
         res.setErrorCode("0");
         try {
-            List<OptionSetValueV1> optionSetValueV1DTOList = optionSetValueV1Repo.findAllByValueAndStatus(commonInputDTO.getSearchV1DTO().getValue(), 1L);
+            List<OptionSetValueV1> optionSetValueV1DTOList = optionSetValueV1Repo.findAllByValueAndStatus((commonInputDTO.getSearchV1DTO().getValue().trim()), 1L);
             res.setData(optionSetValueV1DTOList);
             return res;
         } catch (Exception e) {

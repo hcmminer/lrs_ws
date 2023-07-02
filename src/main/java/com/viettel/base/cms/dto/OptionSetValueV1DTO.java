@@ -1,5 +1,6 @@
 package com.viettel.base.cms.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,6 +15,8 @@ import org.springframework.stereotype.Component;
 @NoArgsConstructor
 // causes Lombok to generate a constructor with 1 parameter for each field in your class.
 @AllArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
+
 @Component
 
 public class OptionSetValueV1DTO {

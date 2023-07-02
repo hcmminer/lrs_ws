@@ -20,8 +20,8 @@ import java.time.LocalDateTime;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Component
 public class SearchV1DTO {
-    private String optionSetCode = "";
-    private String value = "";
+    private String optionSetCode;
+    private String value;
     private Long optionSetId;
     private Long optionSetValueId;
 }

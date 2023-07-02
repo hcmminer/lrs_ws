@@ -47,8 +47,8 @@ public class OptionSetValueV1Ctrl {
         res.setErrorCode("0");
         try {
             List<OptionSetValueV1> optionSetValueV1DTOList =
-                    optionSetValueV1Repo.findAllByValueAndStatus(
-                            (commonInputDTO.getSearchV1DTO().getValue().trim()),
+                    optionSetValueV1Repo.findAllByValueAndStatus(commonInputDTO.getSearchV1DTO().getOptionSetId(),
+                            StringUtils.trimWhitespace(commonInputDTO.getSearchV1DTO().getValue()),
                             1L
                     );
             res.setData(optionSetValueV1DTOList);
@@ -151,7 +151,7 @@ public class OptionSetValueV1Ctrl {
     public ExecutionResult delOptionSetValue(
             @RequestHeader("Accept-Language") String language,
             @RequestBody CommonInputDTO commonInputDTO
-    ) {
+    ) throws Exception {
         ExecutionResult res = new ExecutionResult();
         ResourceBundle r = new ResourceBundle(language);
         res.setErrorCode("0");
@@ -168,17 +168,23 @@ public class OptionSetValueV1Ctrl {
                 return res;
             }
 
-            Optional<OptionSetValueV1> optionSetValueV1 =
+            Optional<OptionSetValueV1> optionalOptionSetValueV1 =
                     optionSetValueV1Repo.findById(
                             optionSetValueV1DTO.getOptionSetValueId()
                     );
-            optionSetValueV1.ifPresent(item -> {
-                item.setCreateBy(commonInputDTO.getUserName().split("----")[0]);
-                item.setCreateDatetime(LocalDateTime.now());
-                item.setStatus(0L);
 
-                optionSetValueV1Repo.save(item);
-            });
+            if (!optionalOptionSetValueV1.isPresent()) {
+                res.setDescription(r.getResourceMessage("cm.code.not.exists"));
+                res.setErrorCode("1");
+                return res;
+            }
+            OptionSetValueV1 optionSetValueV1 = optionalOptionSetValueV1.get();
+            optionSetValueV1.setCreateBy(commonInputDTO.getUserName().split("----")[0]);
+            optionSetValueV1.setCreateDatetime(LocalDateTime.now());
+            optionSetValueV1.setStatus(0L);
+
+            optionSetValueV1Repo.save(optionSetValueV1);
+
 
             res.setDescription(r.getResourceMessage("cm.delSuccess"));
             return res;

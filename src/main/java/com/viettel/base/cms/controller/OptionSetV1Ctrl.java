@@ -13,6 +13,7 @@ import com.viettel.vfw5.base.utils.DataUtils;
 import com.viettel.vfw5.base.utils.ResourceBundle;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.persistence.EntityManager;
@@ -41,7 +42,7 @@ public class OptionSetV1Ctrl {
         ResourceBundle r = new ResourceBundle(language);
         res.setErrorCode("0");
         try {
-            List<OptionSetV1> optionSetV1DTOList = optionSetV1Repo.findAllByOptionSetCodeAndStatus((commonInputDTO.getSearchV1DTO().getOptionSetCode()), 1L);
+            List<OptionSetV1> optionSetV1DTOList = optionSetV1Repo.findAllByOptionSetCodeAndStatus(StringUtils.trimWhitespace(commonInputDTO.getSearchV1DTO().getOptionSetCode()), 1L);
             res.setData(optionSetV1DTOList);
             return res;
         } catch (Exception e) {

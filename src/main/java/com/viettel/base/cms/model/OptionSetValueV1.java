@@ -14,11 +14,11 @@ import java.time.LocalDateTime;
 @Data
 // causes Lombok to implement the Builder design pattern for the Pojo class.
 // usage can be seen in DefaultBeersLoader.java -> createNewBeer() method.
-@Builder
+//@Builder
 // causes Lombok to generate a constructor with no parameters.
 @NoArgsConstructor
 // causes Lombok to generate a constructor with 1 parameter for each field in your class.
-@AllArgsConstructor
+//@AllArgsConstructor
 @Component
 public class OptionSetValueV1 {
     @Id

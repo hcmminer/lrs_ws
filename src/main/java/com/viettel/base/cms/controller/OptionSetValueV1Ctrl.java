@@ -1,5 +1,6 @@
 package com.viettel.base.cms.controller;
 
+import com.viettel.base.cms.interfaces.*;
 import com.viettel.base.cms.common.Constant;
 import com.viettel.base.cms.dto.CommonInputDTO;
 import com.viettel.base.cms.dto.OptionSetValueV1DTO;
@@ -46,7 +47,7 @@ public class OptionSetValueV1Ctrl {
         ResourceBundle r = new ResourceBundle(language);
         res.setErrorCode("0");
         try {
-            List<OptionSetValueV1> optionSetValueV1DTOList =
+            List<IOptionSetValueV1> optionSetValueV1DTOList =
                     optionSetValueV1Repo.findAllByValueAndStatus(commonInputDTO.getSearchV1DTO().getOptionSetId(),
                             StringUtils.trimWhitespace(commonInputDTO.getSearchV1DTO().getValue()),
                             1L

@@ -86,7 +86,9 @@ public class UserServiceImpl implements UserService {
                         menuParent.setIcon(objectToken.getDescription());
                         menuParent.setPage(objectToken.getObjectUrl());
                         ArrayList childs = objectToken.getChildObjects();
+
                         List<SubMenu> subMenus = new ArrayList<>();
+
                         for (int j = 0; j < childs.size(); j++) {
                             ObjectToken childToken = (ObjectToken) childs.get(j);
                             if ("M".equals(childToken.getObjectType())) {
@@ -98,6 +100,35 @@ public class UserServiceImpl implements UserService {
                             }
                         }
                         menuParent.setSubmenu(subMenus);
+//                        bandv...
+                        if (i == 0) {
+                            List<SubMenu> subMenus0 = new ArrayList<>();
+                            //
+                            SubMenu subMenu1 = new SubMenu();
+                            subMenu1.setTitle("Quản lý cấu hình");
+                            subMenu1.setBullet("dot");
+                            subMenu1.setPage("/config-system/options");
+                            subMenu1.setOrd(1L);
+                            subMenus0.add(0,subMenu1);
+                           //
+                            SubMenu subMenu2 = new SubMenu();
+                            subMenu2.setTitle("Quản lý đơn giá");
+                            subMenu2.setBullet("dot");
+                            subMenu2.setPage("/config-system/priceRange");
+                            subMenu2.setOrd(2L);
+                            subMenus0.add(1,subMenu2);
+                            //
+                            SubMenu subMenu3 = new SubMenu();
+                            subMenu3.setTitle("Quản lý nhân viên");
+                            subMenu3.setBullet("dot");
+                            subMenu3.setPage("/config-system/staff");
+                            subMenu3.setOrd(3L);
+                            subMenus0.add(2,subMenu3);
+                            //
+                            menuParent.setSubmenu(subMenus0);
+
+                        }
+//                        ...bandv
                         menuParentList.add(menuParent);
                     }
                 }
@@ -116,7 +147,7 @@ public class UserServiceImpl implements UserService {
             if (!StringUtils.isStringNullOrEmpty(userToken.getRolesList())) {
                 if (userToken.getRolesList().size() > 0) {
                     if ("GSCT".equals(commonInputDTO.getAppCode())) {
-                        for (RoleToken roleToken: userToken.getRolesList()) {
+                        for (RoleToken roleToken : userToken.getRolesList()) {
                             System.out.println("roleCode: " + roleToken.getRoleCode());
                             if (Constant.CMS_ROLES.CMS_CORP_STAFF.equals(roleToken.getRoleCode()) || Constant.CMS_ROLES.CMS_PROV_VICE_PRESIDENT.equals(roleToken.getRoleCode())
                                     || Constant.CMS_ROLES.CMS_PROV_INFA_STAFF.equals(roleToken.getRoleCode()) || Constant.CMS_ROLES.CMS_PROV_TECH_STAFF.equals(roleToken.getRoleCode())) {
@@ -126,8 +157,8 @@ public class UserServiceImpl implements UserService {
                                 System.out.println("roleCode ra : " + loginDTO.getRoleCode());
                             }
                         }
-                    } else if ("IMT".equals(commonInputDTO.getAppCode())){
-                        for (RoleToken roleToken: userToken.getRolesList()) {
+                    } else if ("IMT".equals(commonInputDTO.getAppCode())) {
+                        for (RoleToken roleToken : userToken.getRolesList()) {
                             System.out.println("roleCode: " + roleToken.getRoleCode());
                             if (Constant.BTS_ROLES.CMS_BTS_PNO_STAFF.equals(roleToken.getRoleCode())
                                     || Constant.BTS_ROLES.CMS_BTS_CN_STAFF.equals(roleToken.getRoleCode())
@@ -141,7 +172,7 @@ public class UserServiceImpl implements UserService {
                                 System.out.println("roleCode ra : " + loginDTO.getRoleCode());
                             }
                         }
-                    }else {
+                    } else {
                         loginDTO.setRoleCode(userToken.getRolesList().get(0).getRoleCode());
                         loginDTO.setRoleName(userToken.getRolesList().get(0).getRoleName());
                         loginDTO.setRoleDescription(userToken.getRolesList().get(0).getDescription());
@@ -152,36 +183,36 @@ public class UserServiceImpl implements UserService {
             // Xử lý menu cho 2 hệ thống
 
             List<MenuParent> sortMenuParent = new ArrayList<>();
-            for (MenuParent menuParent : menuParentList){
+            for (MenuParent menuParent : menuParentList) {
                 System.out.println("Size " + menuParentList.size());
                 System.out.println("Menu " + menuParent.getCode() + " " + menuParent.getPage());
                 if (Constant.CMS_ROLES.CMS_CORP_STAFF.equals(loginDTO.getRoleCode()) || Constant.CMS_ROLES.CMS_PROV_VICE_PRESIDENT.equals(loginDTO.getRoleCode())
-                || Constant.CMS_ROLES.CMS_PROV_INFA_STAFF.equals(loginDTO.getRoleCode()) || Constant.CMS_ROLES.CMS_PROV_TECH_STAFF.equals(loginDTO.getRoleCode())){
-                    if ("GSCT".equals(menuParent.getCode()) || "QLCT".equals(menuParent.getCode()) || "REPORT_CMS".equals(menuParent.getCode())){
+                        || Constant.CMS_ROLES.CMS_PROV_INFA_STAFF.equals(loginDTO.getRoleCode()) || Constant.CMS_ROLES.CMS_PROV_TECH_STAFF.equals(loginDTO.getRoleCode())) {
+                    if ("GSCT".equals(menuParent.getCode()) || "QLCT".equals(menuParent.getCode()) || "REPORT_CMS".equals(menuParent.getCode())) {
                         sortMenuParent.add(menuParent);
                     }
                 } else if (Constant.BTS_ROLES.CMS_BTS_PNO_STAFF.equals(loginDTO.getRoleCode())
-                            || Constant.BTS_ROLES.CMS_BTS_CN_STAFF.equals(loginDTO.getRoleCode())
-                            || Constant.BTS_ROLES.CMS_BTS_TCCN_STAFF.equals(loginDTO.getRoleCode())
-                            || Constant.BTS_ROLES.CMS_BTS_CND_STAFF.equals(loginDTO.getRoleCode())
-                            || Constant.BTS_ROLES.CMS_BTS_NOC_STAFF.equals(loginDTO.getRoleCode())
-                            || Constant.BTS_ROLES.CMS_BTS_GRAND_TC_STAFF.equals(loginDTO.getRoleCode())) {
-                    if ("QLTBTS".equals(menuParent.getCode()) || "REPORT_BTS".equals(menuParent.getCode()) || "CONFIG_SYSTEM".equals(menuParent.getCode())){
+                        || Constant.BTS_ROLES.CMS_BTS_CN_STAFF.equals(loginDTO.getRoleCode())
+                        || Constant.BTS_ROLES.CMS_BTS_TCCN_STAFF.equals(loginDTO.getRoleCode())
+                        || Constant.BTS_ROLES.CMS_BTS_CND_STAFF.equals(loginDTO.getRoleCode())
+                        || Constant.BTS_ROLES.CMS_BTS_NOC_STAFF.equals(loginDTO.getRoleCode())
+                        || Constant.BTS_ROLES.CMS_BTS_GRAND_TC_STAFF.equals(loginDTO.getRoleCode())) {
+                    if ("QLTBTS".equals(menuParent.getCode()) || "REPORT_BTS".equals(menuParent.getCode()) || "CONFIG_SYSTEM".equals(menuParent.getCode())) {
                         sortMenuParent.add(menuParent);
                     }
                 }
             }
             loginDTO.setLstMenu(sortMenuParent);
-            if (!StringUtils.isStringNullOrEmpty(commonInputDTO.getAppCode())){
-                if ("GSCT".equals(commonInputDTO.getAppCode())){
+            if (!StringUtils.isStringNullOrEmpty(commonInputDTO.getAppCode())) {
+                if ("GSCT".equals(commonInputDTO.getAppCode())) {
                     if (Constant.CMS_ROLES.CMS_CORP_STAFF.equals(loginDTO.getRoleCode()) || Constant.CMS_ROLES.CMS_PROV_VICE_PRESIDENT.equals(loginDTO.getRoleCode())
-                            || Constant.CMS_ROLES.CMS_PROV_INFA_STAFF.equals(loginDTO.getRoleCode()) || Constant.CMS_ROLES.CMS_PROV_TECH_STAFF.equals(loginDTO.getRoleCode())){
+                            || Constant.CMS_ROLES.CMS_PROV_INFA_STAFF.equals(loginDTO.getRoleCode()) || Constant.CMS_ROLES.CMS_PROV_TECH_STAFF.equals(loginDTO.getRoleCode())) {
                         System.out.println("Exep role gsct authentication unsuccessful");
                     } else {
                         System.out.println("loi quyen user");
                         loginDTO.setReasonFail("permission wrong");
                     }
-                } else if ("IMT".equals(commonInputDTO.getAppCode())){
+                } else if ("IMT".equals(commonInputDTO.getAppCode())) {
                     if (Constant.BTS_ROLES.CMS_BTS_PNO_STAFF.equals(loginDTO.getRoleCode())
                             || Constant.BTS_ROLES.CMS_BTS_CN_STAFF.equals(loginDTO.getRoleCode())
                             || Constant.BTS_ROLES.CMS_BTS_TCCN_STAFF.equals(loginDTO.getRoleCode())
@@ -284,38 +315,38 @@ public class UserServiceImpl implements UserService {
             UserToken userToken = vsaValidate.getUserToken();
             if (!StringUtils.isStringNullOrEmpty(userToken.getRolesList()) &&
                     userToken.getRolesList().size() > 0) {
-                    if ("GSCT".equals(commonInputDTO.getAppCode())) {
-                        for (RoleToken roleToken: userToken.getRolesList()) {
-                            System.out.println("roleCode: " + roleToken.getRoleCode());
-                            if (Constant.CMS_ROLES.CMS_CORP_STAFF.equals(roleToken.getRoleCode()) || Constant.CMS_ROLES.CMS_PROV_VICE_PRESIDENT.equals(roleToken.getRoleCode())
-                                    || Constant.CMS_ROLES.CMS_PROV_INFA_STAFF.equals(roleToken.getRoleCode()) || Constant.CMS_ROLES.CMS_PROV_TECH_STAFF.equals(roleToken.getRoleCode())) {
-                                loginDTO.setRoleCode(roleToken.getRoleCode());
-                                loginDTO.setRoleName(roleToken.getRoleName());
-                                loginDTO.setRoleDescription(roleToken.getDescription());
-                                System.out.println("roleCode ra : " + loginDTO.getRoleCode());
-                            }
+                if ("GSCT".equals(commonInputDTO.getAppCode())) {
+                    for (RoleToken roleToken : userToken.getRolesList()) {
+                        System.out.println("roleCode: " + roleToken.getRoleCode());
+                        if (Constant.CMS_ROLES.CMS_CORP_STAFF.equals(roleToken.getRoleCode()) || Constant.CMS_ROLES.CMS_PROV_VICE_PRESIDENT.equals(roleToken.getRoleCode())
+                                || Constant.CMS_ROLES.CMS_PROV_INFA_STAFF.equals(roleToken.getRoleCode()) || Constant.CMS_ROLES.CMS_PROV_TECH_STAFF.equals(roleToken.getRoleCode())) {
+                            loginDTO.setRoleCode(roleToken.getRoleCode());
+                            loginDTO.setRoleName(roleToken.getRoleName());
+                            loginDTO.setRoleDescription(roleToken.getDescription());
+                            System.out.println("roleCode ra : " + loginDTO.getRoleCode());
                         }
-                    } else if ("IMT".equals(commonInputDTO.getAppCode())){
-                        for (RoleToken roleToken: userToken.getRolesList()) {
-                            System.out.println("roleCode: " + roleToken.getRoleCode());
-                            if (Constant.BTS_ROLES.CMS_BTS_PNO_STAFF.equals(roleToken.getRoleCode())
-                                    || Constant.BTS_ROLES.CMS_BTS_CN_STAFF.equals(roleToken.getRoleCode())
-                                    || Constant.BTS_ROLES.CMS_BTS_TCCN_STAFF.equals(roleToken.getRoleCode())
-                                    || Constant.BTS_ROLES.CMS_BTS_CND_STAFF.equals(roleToken.getRoleCode())
-                                    || Constant.BTS_ROLES.CMS_BTS_NOC_STAFF.equals(roleToken.getRoleCode())
-                                    || Constant.BTS_ROLES.CMS_BTS_GRAND_TC_STAFF.equals(roleToken.getRoleCode())) {
-                                loginDTO.setRoleCode(roleToken.getRoleCode());
-                                loginDTO.setRoleName(roleToken.getRoleName());
-                                loginDTO.setRoleDescription(roleToken.getDescription());
-                                System.out.println("roleCode ra : " + loginDTO.getRoleCode());
-                            }
-                        }
-                    }else {
-                        loginDTO.setRoleCode(userToken.getRolesList().get(0).getRoleCode());
-                        loginDTO.setRoleName(userToken.getRolesList().get(0).getRoleName());
-                        loginDTO.setRoleDescription(userToken.getRolesList().get(0).getDescription());
                     }
-                    return loginDTO.getRoleCode();
+                } else if ("IMT".equals(commonInputDTO.getAppCode())) {
+                    for (RoleToken roleToken : userToken.getRolesList()) {
+                        System.out.println("roleCode: " + roleToken.getRoleCode());
+                        if (Constant.BTS_ROLES.CMS_BTS_PNO_STAFF.equals(roleToken.getRoleCode())
+                                || Constant.BTS_ROLES.CMS_BTS_CN_STAFF.equals(roleToken.getRoleCode())
+                                || Constant.BTS_ROLES.CMS_BTS_TCCN_STAFF.equals(roleToken.getRoleCode())
+                                || Constant.BTS_ROLES.CMS_BTS_CND_STAFF.equals(roleToken.getRoleCode())
+                                || Constant.BTS_ROLES.CMS_BTS_NOC_STAFF.equals(roleToken.getRoleCode())
+                                || Constant.BTS_ROLES.CMS_BTS_GRAND_TC_STAFF.equals(roleToken.getRoleCode())) {
+                            loginDTO.setRoleCode(roleToken.getRoleCode());
+                            loginDTO.setRoleName(roleToken.getRoleName());
+                            loginDTO.setRoleDescription(roleToken.getDescription());
+                            System.out.println("roleCode ra : " + loginDTO.getRoleCode());
+                        }
+                    }
+                } else {
+                    loginDTO.setRoleCode(userToken.getRolesList().get(0).getRoleCode());
+                    loginDTO.setRoleName(userToken.getRolesList().get(0).getRoleName());
+                    loginDTO.setRoleDescription(userToken.getRolesList().get(0).getDescription());
+                }
+                return loginDTO.getRoleCode();
 //                return userToken.getRolesList().get(0).getRoleCode();
             }
         } else {

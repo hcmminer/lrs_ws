@@ -5,6 +5,7 @@ import com.viettel.base.cms.dto.CommonInputDTO;
 import com.viettel.base.cms.dto.OptionSetV1DTO;
 import com.viettel.base.cms.dto.SearchV1DTO;
 import com.viettel.base.cms.model.OptionSetV1;
+import com.viettel.base.cms.model.OptionSetValueV1;
 import com.viettel.base.cms.model.Staff;
 import com.viettel.base.cms.repo.OptionSetV1Repo;
 import com.viettel.base.cms.service.UserService;
@@ -63,7 +64,7 @@ public class OptionSetV1Ctrl {
 
 
             OptionSetV1DTO optionSetV1DTO = commonInputDTO.getOptionSetV1DTO();
-            boolean isExists = optionSetV1Repo.existsByOptionSetCodeAndAndStatus(optionSetV1DTO.getOptionSetCode(), 1L);
+            boolean isExists = optionSetV1Repo.existsByOptionSetCodeAndStatus(optionSetV1DTO.getOptionSetCode(), 1L);
             if (isExists) {
                 res.setDescription(r.getResourceMessage("cm.code.exists"));
                 res.setErrorCode("1");
@@ -97,7 +98,7 @@ public class OptionSetV1Ctrl {
         res.setErrorCode("0");
         try {
             OptionSetV1DTO optionSetV1DTO = commonInputDTO.getOptionSetV1DTO();
-            boolean isExists = optionSetV1Repo.existsByOptionSetCodeAndAndStatus(optionSetV1DTO.getOptionSetCode(), 1L);
+            boolean isExists = optionSetV1Repo.existsByOptionSetCodeAndStatus(optionSetV1DTO.getOptionSetCode(), 1L);
             if (isExists) {
                 res.setDescription(r.getResourceMessage("cm.code.exists"));
                 res.setErrorCode("1");
@@ -131,7 +132,7 @@ public class OptionSetV1Ctrl {
         res.setErrorCode("0");
         try {
             OptionSetV1DTO optionSetV1DTO = commonInputDTO.getOptionSetV1DTO();
-            boolean isExists = optionSetV1Repo.existsByOptionSetCodeAndAndStatus(optionSetV1DTO.getOptionSetCode(), 1L);
+            boolean isExists = optionSetV1Repo.existsByOptionSetCodeAndStatus(optionSetV1DTO.getOptionSetCode(), 1L);
             if (isExists) {
                 res.setDescription(r.getResourceMessage("cm.code.exists"));
                 res.setErrorCode("1");
@@ -139,14 +140,21 @@ public class OptionSetV1Ctrl {
             }
 
 
-            Optional<OptionSetV1> optionSetV1 = optionSetV1Repo.findById(optionSetV1DTO.getOptionSetId());
-            optionSetV1.ifPresent(item -> {
-                item.setCreateBy(commonInputDTO.getUserName().split("----")[0]);
-                item.setCreateDatetime(LocalDateTime.now());
-                item.setStatus(0L);
+            Optional<OptionSetV1> optionalOptionSetV1 = optionSetV1Repo.findById(optionSetV1DTO.getOptionSetId());
 
-                optionSetV1Repo.save(item);
-            });
+            if (!optionalOptionSetV1.isPresent()) {
+                res.setDescription(r.getResourceMessage("cm.code.not.exists"));
+                res.setErrorCode("1");
+                return res;
+            }
+
+            OptionSetV1 optionSetV1 = optionalOptionSetV1.get();
+
+            optionSetV1.setCreateBy(commonInputDTO.getUserName().split("----")[0]);
+            optionSetV1.setCreateDatetime(LocalDateTime.now());
+            optionSetV1.setStatus(0L);
+
+            optionSetV1Repo.save(optionSetV1);
 
 
             res.setDescription(r.getResourceMessage("cm.delSuccess"));

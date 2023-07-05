@@ -21,6 +21,9 @@ public class PriceRange {
     @Column(name = "PRICE_RANGE_ID")
     private Long priceRangeId;
 
+    @Column(name = "option_set_value_id")
+    private Long optionSetValueId;
+
     @Column(name = "PROVINCE_ID")
     private Long provinceId;
 

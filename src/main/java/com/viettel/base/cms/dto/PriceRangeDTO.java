@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class PriceRangeDTO {
     private Long priceRangeId;
+    private Long optionSetValueId;
     private Long provinceId;
     private String priceCode;
     private String description;

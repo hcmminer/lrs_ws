@@ -105,21 +105,21 @@ public class UserServiceImpl implements UserService {
                             List<SubMenu> subMenus0 = new ArrayList<>();
                             //
                             SubMenu subMenu1 = new SubMenu();
-                            subMenu1.setTitle("Quản lý cấu hình");
+                            subMenu1.setTitle("optionsManager");
                             subMenu1.setBullet("dot");
                             subMenu1.setPage("/config-system/options");
                             subMenu1.setOrd(1L);
                             subMenus0.add(0,subMenu1);
                            //
                             SubMenu subMenu2 = new SubMenu();
-                            subMenu2.setTitle("Quản lý đơn giá");
+                            subMenu2.setTitle("priceRangeManager");
                             subMenu2.setBullet("dot");
                             subMenu2.setPage("/config-system/priceRange");
                             subMenu2.setOrd(2L);
                             subMenus0.add(1,subMenu2);
                             //
                             SubMenu subMenu3 = new SubMenu();
-                            subMenu3.setTitle("Quản lý nhân viên");
+                            subMenu3.setTitle("staffManager");
                             subMenu3.setBullet("dot");
                             subMenu3.setPage("/config-system/staff");
                             subMenu3.setOrd(3L);

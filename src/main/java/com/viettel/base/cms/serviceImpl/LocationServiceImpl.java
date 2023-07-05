@@ -1,6 +1,8 @@
 package com.viettel.base.cms.serviceImpl;
 
 import com.viettel.base.cms.common.Constant;
+import com.viettel.base.cms.dto.CommuneDTO;
+import com.viettel.base.cms.dto.DataParams;
 import com.viettel.base.cms.dto.DistrictDTO;
 import com.viettel.base.cms.dto.ProvinceDTO;
 import com.viettel.base.cms.model.ConstructionItem;
@@ -35,6 +37,7 @@ public class LocationServiceImpl implements LocationService {
     @Autowired
     ProvinceRepo provinceRepo;
 
+    @Override
     public List<ProvinceDTO> getListProvince() throws Exception {
         try {
             List<ProvinceDTO> lstResult = new ArrayList<>();
@@ -65,6 +68,7 @@ public class LocationServiceImpl implements LocationService {
         }
     }
 
+    @Override
     public List<ProvinceDTO> searchProvince(String provinceName) throws Exception {
         try {
             List<ProvinceDTO> lstResult = new ArrayList<>();
@@ -94,6 +98,7 @@ public class LocationServiceImpl implements LocationService {
         }
     }
 
+    @Override
     public Province addProvince(ProvinceDTO provinceDTO, String userName) throws Exception {
         Province province = new Province();
         Long provinceId = DataUtils.getSequence(this.cms, "province_seq");
@@ -109,6 +114,7 @@ public class LocationServiceImpl implements LocationService {
         return province;
     }
 
+    @Override
     public List<ProvinceDTO> checkProvinceCodeDuplicate(String provinceCode) throws Exception {
         try {
             List<ProvinceDTO> lstResult = new ArrayList<>();
@@ -140,6 +146,7 @@ public class LocationServiceImpl implements LocationService {
         }
     }
 
+    @Override
     public List<ProvinceDTO> checkProvinceNameDuplicate(String provinceName) throws Exception {
         try {
             List<ProvinceDTO> lstResult = new ArrayList<>();
@@ -171,10 +178,39 @@ public class LocationServiceImpl implements LocationService {
         }
     }
 
-    @Transactional(rollbackFor = {Exception.class})
+    @Override
+    public ProvinceDTO checkProvinceStatus(ProvinceDTO provinceDTO) throws Exception {
+        try {
+            ProvinceDTO pro = new ProvinceDTO();
+            String sql = " SELECT   " +
+                    " pro_id, pro_name , pro_code, status " +
+                    " FROM  province  " +
+                    " WHERE pro_id = :provinceId ";
+            Query query = this.cms.createNativeQuery(sql);
+            query.setParameter("provinceId", provinceDTO.getProId());
+            List<Object[]> lst = query.getResultList();
+            if (!lst.isEmpty() && lst != null) {
+                for (Object[] obj : lst) {
+                    int i = 0;
+                    pro.setProId(Long.valueOf(obj[i++].toString()));
+                    pro.setProCode(obj[i++].toString());
+                    pro.setProName(obj[i++].toString());
+                    pro.setStatus(Long.valueOf(obj[i++].toString()));
+                }
+            } else {
+                pro = null;
+            }
+            return pro;
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
     public int updateProvince(ProvinceDTO provinceDTO, String userName) throws Exception {
         try {
-            List<ProvinceDTO> lstResult = new ArrayList<>();
             String sql = " UPDATE province  " +
                     " SET pro_name = :provinceName, " +
                     " pro_code = :provinceCode, " +
@@ -194,13 +230,61 @@ public class LocationServiceImpl implements LocationService {
         }
     }
 
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public int deleteProvince(ProvinceDTO provinceDTO, String userName) throws Exception {
+        try {
+            String sql = " UPDATE province  " +
+                    " SET status = 0, " +
+                    " update_by = :updateBy, " +
+                    " update_datetime = :updateDatetime  " +
+                    " WHERE pro_id = :provinceId ";
+            Query query = this.cms.createNativeQuery(sql);
+            query.setParameter("provinceId", provinceDTO.getProId());
+            query.setParameter("updateBy", userName);
+            query.setParameter("updateDatetime", LocalDateTime.now());
+            return query.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    @Override
+    public ProvinceDTO checkProvinceId(ProvinceDTO provinceDTO) throws Exception {
+        try {
+            ProvinceDTO pro = new ProvinceDTO();
+            String sql = " SELECT   " +
+                    " pro_id, pro_name , pro_code, status " +
+                    " FROM  province  " +
+                    " WHERE pro_id = :provinceId ";
+            Query query = this.cms.createNativeQuery(sql);
+            query.setParameter("provinceId", provinceDTO.getProId());
+            List<Object[]> lst = query.getResultList();
+            if (!lst.isEmpty() && lst != null) {
+                for (Object[] obj : lst) {
+                    int i = 0;
+                    pro.setProId(Long.valueOf(obj[i++].toString()));
+                    pro.setProCode(obj[i++].toString());
+                    pro.setProName(obj[i++].toString());
+                    pro.setStatus(Long.valueOf(obj[i++].toString()));
+                }
+            } else {
+                pro = null;
+            }
+            return pro;
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    @Override
     public List<DistrictDTO> getListDistrict(ProvinceDTO provinceDTO) throws Exception {
         try {
             List<DistrictDTO> lstResult = new ArrayList<>();
             String sql = " SELECT   " +
-                    " pd.dist_id,   pd.pro_id,   pd.dist_name,   " +
-                    " pd.center_point,   " +
-                    " pd.def_zoom   " +
+                    " pd.dist_id,   pd.pro_id,   pd.dist_name   " +
                     " FROM   province_district pd, province p " +
                     " WHERE pd.pro_id = p.pro_id " +
                     " AND LOWER (p.pro_code) = LOWER (:proCode) " +
@@ -215,8 +299,6 @@ public class LocationServiceImpl implements LocationService {
                     districtDTO.setDistId(Long.valueOf(obj[i++].toString()));
                     districtDTO.setProId(Long.valueOf(obj[i++].toString()));
                     districtDTO.setDistName(obj[i++].toString());
-                    districtDTO.setCenterPoint(obj[i++].toString());
-                    districtDTO.setDefZoom(Long.valueOf(obj[i++].toString()));
                     lstResult.add(districtDTO);
                 }
             return lstResult;
@@ -226,6 +308,334 @@ public class LocationServiceImpl implements LocationService {
         }
     }
 
+    @Override
+    public List<DistrictDTO> searchDistrict(DistrictDTO districtDTO) throws Exception {
+        try {
+            List<DistrictDTO> lstResult = new ArrayList<>();
+            String sql = " SELECT   " +
+                    " p.pro_id, d.DISTRICT_ID, d.DISTRICT_NAME, p.pro_code, p.pro_name, d.DISTRICT_CODE  " +
+                    " FROM  province p, district d " +
+                    " WHERE " +
+                    " p.pro_id = d.PROVINCE_ID " +
+                    " AND d.`status` = 1 ";
+            if (!StringUtils.isStringNullOrEmpty(districtDTO.getProId()))
+                sql = sql + " AND d.PROVINCE_ID = :provinceId";
+            if (!StringUtils.isStringNullOrEmpty(districtDTO.getDistName()))
+                sql = sql + " AND LOWER(DISTRICT_NAME) LIKE LOWER(:distName) ";
+            Query query = this.cms.createNativeQuery(sql);
+            if (!StringUtils.isStringNullOrEmpty(districtDTO.getDistName()))
+                query.setParameter("distName", "%" + districtDTO.getDistName() + "%");
+            if (!StringUtils.isStringNullOrEmpty(districtDTO.getProId()))
+                query.setParameter("provinceId", districtDTO.getProId());
+            List<Object[]> lst = query.getResultList();
+            if (!lst.isEmpty() && lst != null)
+                for (Object[] obj : lst) {
+                    int i = 0;
+                    DistrictDTO dis = new DistrictDTO();
+                    dis.setProId(Long.valueOf(obj[i++].toString()));
+                    dis.setDistId(Long.valueOf(obj[i++].toString()));
+                    dis.setDistName(obj[i++].toString());
+                    dis.setProCode(obj[i++].toString());
+                    dis.setProName(obj[i++].toString());
+                    dis.setDistCode(obj[i++].toString());
+                    lstResult.add(dis);
+                }
+            return lstResult;
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    @Override
+    public District addDistrict(DistrictDTO DistrictDTO, String userName) throws Exception {
+        District district = new District();
+        Long districtId = DataUtils.getSequence(this.cms, "district_seq");
+        district.setDistrictId(districtId);
+        district.setProvinceId(DistrictDTO.getProId());
+        district.setDistrictName(DistrictDTO.getDistName());
+        district.setDistrictCode(DistrictDTO.getDistCode());
+        district.setCreateDatetime(LocalDateTime.now());
+        district.setCreateBy(userName);
+        district.setUpdateDatetime(LocalDateTime.now());
+        district.setUpdateBy(userName);
+        district.setStatus(Long.valueOf(1L));
+        districtRepo.save(district);
+        return district;
+    }
+
+    @Override
+    public List<DistrictDTO> checkDistrictCodeDuplicate(String districtCode) throws Exception {
+        try {
+            List<DistrictDTO> lstResult = new ArrayList<>();
+            String sql = " SELECT   " +
+                    " PROVINCE_ID, DISTRICT_CODE , DISTRICT_NAME " +
+                    " FROM  district  " +
+                    " WHERE `status` = 1  " +
+                    " AND DISTRICT_CODE = :districtCode ";
+            Query query = this.cms.createNativeQuery(sql);
+            if (!StringUtils.isStringNullOrEmpty(districtCode))
+                query.setParameter("districtCode", districtCode);
+            List<Object[]> lst = query.getResultList();
+            if (!lst.isEmpty() && lst != null) {
+                for (Object[] obj : lst) {
+                    int i = 0;
+                    DistrictDTO dis = new DistrictDTO();
+                    dis.setProId(Long.valueOf(obj[i++].toString()));
+                    dis.setDistCode(obj[i++].toString());
+                    dis.setDistName(obj[i++].toString());
+                    lstResult.add(dis);
+                }
+            } else {
+                lstResult = null;
+            }
+            return lstResult;
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    @Override
+    public List<DistrictDTO> checkDistrictNameDuplicate(String districtName) throws Exception {
+        try {
+            List<DistrictDTO> lstResult = new ArrayList<>();
+            String sql = " SELECT   " +
+                    " PROVINCE_ID, DISTRICT_CODE , DISTRICT_NAME " +
+                    " FROM  district  " +
+                    " WHERE `status` = 1  " +
+                    " AND DISTRICT_NAME = :districtName ";
+            Query query = this.cms.createNativeQuery(sql);
+            if (!StringUtils.isStringNullOrEmpty(districtName))
+                query.setParameter("districtName", districtName);
+            List<Object[]> lst = query.getResultList();
+            if (!lst.isEmpty() && lst != null) {
+                for (Object[] obj : lst) {
+                    int i = 0;
+                    DistrictDTO dis = new DistrictDTO();
+                    dis.setProId(Long.valueOf(obj[i++].toString()));
+                    dis.setDistCode(obj[i++].toString());
+                    dis.setDistName(obj[i++].toString());
+                    lstResult.add(dis);
+                }
+            } else {
+                lstResult = null;
+            }
+            return lstResult;
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    @Override
+    public DistrictDTO checkDistrictStatus(DistrictDTO districtDTO) throws Exception {
+        try {
+            DistrictDTO dis = new DistrictDTO();
+            String sql = " SELECT   " +
+                    " PROVINCE_ID, DISTRICT_CODE, DISTRICT_NAME , status " +
+                    " FROM  district  " +
+                    " WHERE DISTRICT_ID = :districtId ";
+            Query query = this.cms.createNativeQuery(sql);
+            query.setParameter("districtId", districtDTO.getDistId());
+            List<Object[]> lst = query.getResultList();
+            if (!lst.isEmpty() && lst != null) {
+                for (Object[] obj : lst) {
+                    int i = 0;
+                    dis.setProId(Long.valueOf(obj[i++].toString()));
+                    dis.setDistCode(obj[i++].toString());
+                    dis.setDistName(obj[i++].toString());
+                    dis.setStatus(Long.valueOf(obj[i++].toString()));
+                }
+            } else {
+                dis = null;
+            }
+            return dis;
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public int updateDistrict(DistrictDTO districtDTO, String userName) throws Exception {
+        try {
+            String sql = " UPDATE district  " +
+                    " SET PROVINCE_ID = :provinceId, " +
+                    " DISTRICT_CODE = :districtCode, " +
+                    " DISTRICT_NAME = :districtName, " +
+                    " update_by = :updateBy, " +
+                    " update_datetime = :updateDatetime  " +
+                    " WHERE DISTRICT_ID = :districtId ";
+            Query query = this.cms.createNativeQuery(sql);
+            query.setParameter("districtId", districtDTO.getDistId());
+            query.setParameter("provinceId", districtDTO.getProId());
+            query.setParameter("districtCode", districtDTO.getDistCode());
+            query.setParameter("districtName", districtDTO.getDistName());
+            query.setParameter("updateBy", userName);
+            query.setParameter("updateDatetime", LocalDateTime.now());
+            return query.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    @Override
+    public DistrictDTO checkDistrictId(DistrictDTO districtDTO) throws Exception {
+        try {
+            DistrictDTO dis = new DistrictDTO();
+            String sql = " SELECT   " +
+                    " PROVINCE_ID, DISTRICT_CODE, DISTRICT_NAME , status " +
+                    " FROM  district  " +
+                    " WHERE DISTRICT_ID = :districtId ";
+            Query query = this.cms.createNativeQuery(sql);
+            query.setParameter("districtId", districtDTO.getDistId());
+            List<Object[]> lst = query.getResultList();
+            if (!lst.isEmpty() && lst != null) {
+                for (Object[] obj : lst) {
+                    int i = 0;
+                    dis.setProId(Long.valueOf(obj[i++].toString()));
+                    dis.setDistCode(obj[i++].toString());
+                    dis.setDistName(obj[i++].toString());
+                    dis.setStatus(Long.valueOf(obj[i++].toString()));
+                }
+            } else {
+                dis = null;
+            }
+            return dis;
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public int deleteDistrict(DistrictDTO districtDTO, String userName) throws Exception {
+        try {
+            String sql = " UPDATE district  " +
+                    " SET status = 0, " +
+                    " update_by = :updateBy, " +
+                    " update_datetime = :updateDatetime  " +
+                    " WHERE DISTRICT_ID = :districtId ";
+            Query query = this.cms.createNativeQuery(sql);
+            query.setParameter("districtId", districtDTO.getDistId());
+            query.setParameter("updateBy", userName);
+            query.setParameter("updateDatetime", LocalDateTime.now());
+            return query.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    @Override
+    public List<CommuneDTO> getListCommune(DataParams dataParams, CommuneDTO communeDTO) throws Exception {
+        try {
+            List<CommuneDTO> lstResult = new ArrayList<>();
+            String sql = " SELECT   " +
+                    "      p.pro_id, d.DISTRICT_ID, e.CODE, e.NAME, e.ID, e.create_datetime, e.create_by, e.update_datetime, e.update_by" +
+                    " FROM  " +
+                    "      province p, district d, commune e" +
+                    " WHERE " +
+                    "      p.pro_id = e.PROVINCE_ID" +
+                    " AND" +
+                    "      d.DISTRICT_ID = e.DISTRICT_ID" +
+                    " AND " +
+                    "      e.status = 1 " +
+                    " LIMIT :start_row, :page_limit ";
+            Query query = this.cms.createNativeQuery(sql);
+            if (!StringUtils.isStringNullOrEmpty(dataParams)) {
+                query.setParameter("start_row", dataParams.getStartRow());
+                query.setParameter("page_limit", dataParams.getPageLimit());
+            }
+            List<Object[]> lst = query.getResultList();
+            if (!lst.isEmpty() && lst != null)
+                for (Object[] obj : lst) {
+                    int i = 0;
+                    CommuneDTO commune = new CommuneDTO();
+                    commune.setProId(Long.valueOf(obj[i++].toString()));
+                    commune.setDistId(Long.valueOf(obj[i++].toString()));
+                    commune.setCommuneCode(obj[i++].toString());
+                    commune.setCommuneName(obj[i++].toString());
+                    commune.setCommuneId(Long.valueOf(obj[i++].toString()));
+                    commune.setCreateDatetime(LocalDateTime.now());
+                    commune.setCreateBy(obj[i++].toString());
+                    commune.setUpdateDatetime(LocalDateTime.now());
+                    commune.setUpdateBy(obj[i++].toString());
+                    lstResult.add(commune);
+                }
+            return lstResult;
+        } catch (
+                Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+
+    }
+
+    @Override
+    public int totalRecordSearch(DataParams dataParams, CommuneDTO communeDTO) throws Exception {
+        try {
+            String sql = " SELECT   " +
+                    "      count(*)" +
+                    " FROM  " +
+                    "      province p, district d, commune e" +
+                    " WHERE " +
+                    "      p.pro_id = e.PROVINCE_ID" +
+                    " AND" +
+                    "      d.DISTRICT_ID = e.DISTRICT_ID" +
+                    " AND " +
+                    "      e.status = 1 ";
+            Query query = this.cms.createNativeQuery(sql);
+            return ((Number) query.getSingleResult()).intValue();
+        } catch (
+                Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    @Override
+    public List<CommuneDTO> searchCommune(CommuneDTO communeDTO) throws Exception {
+        try {
+            List<CommuneDTO> lstResult = new ArrayList<>();
+            String sql = " SELECT   " +
+                    "      p.pro_id, d.DISTRICT_ID, e.CODE, e.NAME " +
+                    " FROM  " +
+                    "      province p, district d, commune e" +
+                    " WHERE " +
+                    "      p.pro_id = e.PROVINCE_ID" +
+                    " AND" +
+                    "      d.DISTRICT_ID = e.DISTRICT_ID" +
+                    " AND " +
+                    "      e.status = 1 ";
+            if (!StringUtils.isStringNullOrEmpty(communeDTO.getCommuneName()))
+                sql = sql + " AND LOWER(NAME) LIKE LOWER(:communeName) ";
+            Query query = this.cms.createNativeQuery(sql);
+            if (!StringUtils.isStringNullOrEmpty(communeDTO.getCommuneName()))
+                query.setParameter("communeName", "%" + communeDTO.getCommuneName() + "%");
+            List<Object[]> lst = query.getResultList();
+            if (!lst.isEmpty() && lst != null)
+                for (Object[] obj : lst) {
+                    int i = 0;
+                    CommuneDTO com = new CommuneDTO();
+                    com.setProId(Long.valueOf(obj[i++].toString()));
+                    com.setDistId(Long.valueOf(obj[i++].toString()));
+                    com.setCommuneCode(obj[i++].toString());
+                    com.setCommuneName(obj[i++].toString());
+                    lstResult.add(com);
+                }
+            return lstResult;
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    @Override
     public List<Province> getListProvinceByCode(String provinceCode) throws Exception {
         try {
             String sql = " SELECT   *    " +
@@ -241,6 +651,7 @@ public class LocationServiceImpl implements LocationService {
         }
     }
 
+    @Override
     public List<District> getListDistrictByIdAndProCode(String provinceCode, Long districtId) throws Exception {
         try {
             String sql = " SELECT   d.*    " +
@@ -259,6 +670,7 @@ public class LocationServiceImpl implements LocationService {
         }
     }
 
+    @Override
     public District getListDistrictById(Long districtId) throws Exception {
         try {
             Optional<District> result = this.districtRepo.findById(districtId);

@@ -13,7 +13,7 @@ import javax.persistence.Table;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "district")
+@Table(name = "commune")
 // causes Lombok to generate toString(), equals(), hashCode(), getter() & setter(), and Required arguments constructor in one go.
 @Data
 // causes Lombok to implement the Builder design pattern for the Pojo class.
@@ -24,16 +24,20 @@ import java.time.LocalDateTime;
 // causes Lombok to generate a constructor with 1 parameter for each field in your class.
 @AllArgsConstructor
 @Component
-public class District {
+public class Commune {
     @Id
+    @Column(name = "id", nullable = false)
+    private Long communeId;
     @Column(name = "district_id", nullable = false)
     private Long districtId;
     @Column(name = "province_id", nullable = false)
     private Long provinceId;
-    @Column(name = "district_name", nullable = false)
-    private String districtName;
-    @Column(name = "district_code", nullable = false)
-    private String districtCode;
+    @Column(name = "code", nullable = false)
+    private String communeCode;
+    @Column(name = "name", nullable = false)
+    private String communeName;
+    @Column(name = "status", nullable = true)
+    private Long status;
     @Column(name = "create_datetime", nullable = true)
     private LocalDateTime createDatetime;
     @Column(name = "create_by", nullable = true)
@@ -42,6 +46,5 @@ public class District {
     private LocalDateTime updateDatetime;
     @Column(name = "update_by", nullable = true)
     private String updateBy;
-    @Column(name = "status", nullable = true)
-    private Long status;
 }
+

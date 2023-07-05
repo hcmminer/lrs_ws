@@ -11,6 +11,7 @@ package com.viettel.vfw5.base.dto;
  */
 public class ExecutionResult {
     private Object data;
+    private Object pageInfo;
     private String errorCode;
     private String description;
 
@@ -44,6 +45,13 @@ public class ExecutionResult {
         this.description = description;
     }
 
+    public Object getPageInfo() {
+        return pageInfo;
+    }
+
+    public void setPageInfo(Object pageInfo) {
+        this.pageInfo = pageInfo;
+    }
     
  
 }

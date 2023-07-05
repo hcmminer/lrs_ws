@@ -27,16 +27,15 @@ import java.util.Date;
 // causes Lombok to generate a constructor with 1 parameter for each field in your class.
 @AllArgsConstructor
 @Component
-public class DistrictDTO {
+public class CommuneDTO {
+    private Long communeId;
     private Long distId;
     private Long proId;
-    private String proCode;
-    private String proName;
-    private String distCode;
-    private String distName;
+    private String communeCode;
+    private String communeName;
+    private Long status;
     private LocalDateTime createDatetime;
     private String createBy;
     private LocalDateTime updateDatetime;
     private String updateBy;
-    private Long status;
 }

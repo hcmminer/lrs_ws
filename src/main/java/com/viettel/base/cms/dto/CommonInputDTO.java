@@ -43,8 +43,6 @@ public class CommonInputDTO {
     private Long constructionItemId;
     private List<ImageDTO> imageDTOList;
     private String appCode;
-    private String provinceName;
-    private String provinceCode;
     private Long provinceId;
     private DistrictDTO districtDTO;
     private CommuneDTO communeDTO;

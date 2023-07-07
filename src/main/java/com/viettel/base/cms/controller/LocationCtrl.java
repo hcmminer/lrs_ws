@@ -2,6 +2,7 @@ package com.viettel.base.cms.controller;
 
 import com.viettel.base.cms.common.Constant;
 import com.viettel.base.cms.dto.*;
+import com.viettel.base.cms.model.Commune;
 import com.viettel.base.cms.model.District;
 import com.viettel.base.cms.model.Province;
 import com.viettel.base.cms.service.LocationService;
@@ -49,8 +50,22 @@ public class LocationCtrl {
         ResourceBundle r = new ResourceBundle(language);
         res.setErrorCode(Constant.EXECUTION_ERROR.SUCCESS);
         try {
-            List<ProvinceDTO> listProvince = locationService.searchProvince(commonInputDTO.getProvinceName());
+            if (StringUtils.isStringNullOrEmpty(commonInputDTO.getDataParams().getCurrentPage()) || commonInputDTO.getDataParams().getCurrentPage() == 0) {
+                res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
+                res.setDescription(r.getResourceMessage("current.page.null"));
+                return res;
+            }
+            if (StringUtils.isStringNullOrEmpty(commonInputDTO.getDataParams().getPageLimit()) || commonInputDTO.getDataParams().getPageLimit() == 0) {
+                res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
+                res.setDescription(r.getResourceMessage("page.limit.null"));
+                return res;
+            }
+            int totalRecord = locationService.totalRecordSearchProvince(commonInputDTO.getDataParams(), commonInputDTO.getProvinceDTO().getProName());
+            DataParams pageInfo = DataUtils.getPageInfo(commonInputDTO.getDataParams(), totalRecord);
+            commonInputDTO.setDataParams(pageInfo);
+            List<ProvinceDTO> listProvince = locationService.searchProvince(commonInputDTO.getDataParams(), commonInputDTO.getProvinceDTO().getProName());
             if (listProvince != null && !listProvince.isEmpty()) {
+                res.setPageInfo(pageInfo);
                 res.setData(listProvince);
                 res.setDescription(Constant.EXECUTION_MESSAGE.OK);
             } else {
@@ -136,7 +151,7 @@ public class LocationCtrl {
                     res.setDescription(r.getResourceMessage("province.check.status.update"));
                     return res;
                 }
-                if (resultProvinceStatus.getProName().equals(commonInputDTO.getProvinceName())) {
+                if (!resultProvinceStatus.getProCode().equals(commonInputDTO.getProvinceDTO().getProCode())) {
                     if (StringUtils.isStringNullOrEmpty(commonInputDTO.getProvinceDTO().getProCode())) {
                         res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
                         res.setDescription(r.getResourceMessage("province.code.null"));
@@ -165,18 +180,11 @@ public class LocationCtrl {
                         res.setDescription(r.getResourceMessage("province.name.check.duplicate"));
                         return res;
                     }
-                    int resultAddProvince = locationService.updateProvince(commonInputDTO.getProvinceDTO(), userName);
-                    if (resultAddProvince != 1) {
-                        res.setDescription(r.getResourceMessage("province.update.fail"));
-                    } else {
-                        res.setDescription(r.getResourceMessage("province.update.success"));
-                    }
-                    return res;
                 }
-                if (resultProvinceStatus.getProCode().equals(commonInputDTO.getProvinceCode())) {
-                    if (StringUtils.isStringNullOrEmpty(commonInputDTO.getProvinceDTO().getProCode())) {
+                if (!resultProvinceStatus.getProName().equals(commonInputDTO.getProvinceDTO().getProName())) {
+                    if (StringUtils.isStringNullOrEmpty(commonInputDTO.getProvinceDTO().getProName())) {
                         res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-                        res.setDescription(r.getResourceMessage("province.code.null"));
+                        res.setDescription(r.getResourceMessage("province.name.null"));
                         return res;
                     }
                     List<ProvinceDTO> resultProvince = locationService.checkProvinceCodeDuplicate(commonInputDTO.getProvinceDTO().getProCode());
@@ -190,30 +198,29 @@ public class LocationCtrl {
                         res.setDescription(r.getResourceMessage("province.id.null"));
                         return res;
                     }
-                    if (StringUtils.isStringNullOrEmpty(commonInputDTO.getProvinceDTO().getProName())) {
+                    if (StringUtils.isStringNullOrEmpty(commonInputDTO.getProvinceDTO().getProCode())) {
                         res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-                        res.setDescription(r.getResourceMessage("province.name.null"));
+                        res.setDescription(r.getResourceMessage("province.code.null"));
                         return res;
                     }
-
                     List<ProvinceDTO> resultProvinceName = locationService.checkProvinceNameDuplicate(commonInputDTO.getProvinceDTO().getProName());
                     if (resultProvinceName != null && !resultProvinceName.isEmpty()) {
                         res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
                         res.setDescription(r.getResourceMessage("province.name.check.duplicate"));
                         return res;
                     }
-                    int resultAddProvince = locationService.updateProvince(commonInputDTO.getProvinceDTO(), userName);
-                    if (resultAddProvince != 1) {
-                        res.setDescription(r.getResourceMessage("province.update.fail"));
-                    } else {
-                        res.setDescription(r.getResourceMessage("province.update.success"));
-                    }
-                    return res;
                 }
             } else {
                 res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
                 res.setDescription(r.getResourceMessage("province.check.status.update"));
                 return res;
+            }
+
+            int resultAddProvince = locationService.updateProvince(commonInputDTO.getProvinceDTO(), userName);
+            if (resultAddProvince != 1) {
+                res.setDescription(r.getResourceMessage("province.update.fail"));
+            } else {
+                res.setDescription(r.getResourceMessage("province.update.success"));
             }
             return res;
         } catch (Exception e) {
@@ -247,8 +254,8 @@ public class LocationCtrl {
                 res.setDescription(r.getResourceMessage("province.check.id.delete"));
                 return res;
             }
-            int resultUpdateProvince = locationService.deleteProvince(commonInputDTO.getProvinceDTO(), userName);
-            if (resultUpdateProvince != 1) {
+            int resultDeleteProvince = locationService.deleteProvince(commonInputDTO.getProvinceDTO(), userName);
+            if (resultDeleteProvince != 1) {
                 res.setDescription(r.getResourceMessage("province.delete.fail"));
             } else {
                 res.setDescription(r.getResourceMessage("province.delete.success"));
@@ -294,8 +301,22 @@ public class LocationCtrl {
         ResourceBundle r = new ResourceBundle(language);
         res.setErrorCode(Constant.EXECUTION_ERROR.SUCCESS);
         try {
-            List<DistrictDTO> listDistrict = locationService.searchDistrict(commonInputDTO.getDistrictDTO());
+            if (StringUtils.isStringNullOrEmpty(commonInputDTO.getDataParams().getCurrentPage()) || commonInputDTO.getDataParams().getCurrentPage() == 0) {
+                res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
+                res.setDescription(r.getResourceMessage("current.page.null"));
+                return res;
+            }
+            if (StringUtils.isStringNullOrEmpty(commonInputDTO.getDataParams().getPageLimit()) || commonInputDTO.getDataParams().getPageLimit() == 0) {
+                res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
+                res.setDescription(r.getResourceMessage("page.limit.null"));
+                return res;
+            }
+            int totalRecord = locationService.totalRecordSearchDistrict(commonInputDTO.getDataParams(), commonInputDTO.getDistrictDTO());
+            DataParams pageInfo = DataUtils.getPageInfo(commonInputDTO.getDataParams(), totalRecord);
+            commonInputDTO.setDataParams(pageInfo);
+            List<DistrictDTO> listDistrict = locationService.searchDistrict(commonInputDTO.getDataParams(), commonInputDTO.getDistrictDTO());
             if (listDistrict != null && !listDistrict.isEmpty()) {
+                res.setPageInfo(pageInfo);
                 res.setData(listDistrict);
                 res.setDescription(Constant.EXECUTION_MESSAGE.OK);
             } else {
@@ -389,7 +410,7 @@ public class LocationCtrl {
                     res.setDescription(r.getResourceMessage("district.check.status.update"));
                     return res;
                 }
-                if (resultDistrictStatus.getDistCode().equals(commonInputDTO.getDistrictDTO().getDistCode())) {
+                if (!resultDistrictStatus.getDistCode().equals(commonInputDTO.getDistrictDTO().getDistCode())) {
                     if (StringUtils.isStringNullOrEmpty(commonInputDTO.getDistrictDTO().getDistCode())) {
                         res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
                         res.setDescription(r.getResourceMessage("district.code.null"));
@@ -421,10 +442,10 @@ public class LocationCtrl {
                         return res;
                     }
                 }
-                if (resultDistrictStatus.getDistName().equals(commonInputDTO.getDistrictDTO().getDistName())) {
-                    if (StringUtils.isStringNullOrEmpty(commonInputDTO.getDistrictDTO().getDistCode())) {
+                if (!resultDistrictStatus.getDistName().equals(commonInputDTO.getDistrictDTO().getDistName())) {
+                    if (StringUtils.isStringNullOrEmpty(commonInputDTO.getDistrictDTO().getDistName())) {
                         res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-                        res.setDescription(r.getResourceMessage("district.code.null"));
+                        res.setDescription(r.getResourceMessage("district.name.null"));
                         return res;
                     }
                     ProvinceDTO province = new ProvinceDTO();
@@ -441,9 +462,9 @@ public class LocationCtrl {
                         res.setDescription(r.getResourceMessage("district.code.duplicate"));
                         return res;
                     }
-                    if (StringUtils.isStringNullOrEmpty(commonInputDTO.getDistrictDTO().getDistName())) {
+                    if (StringUtils.isStringNullOrEmpty(commonInputDTO.getDistrictDTO().getDistCode())) {
                         res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-                        res.setDescription(r.getResourceMessage("district.name.null"));
+                        res.setDescription(r.getResourceMessage("district.code.null"));
                         return res;
                     }
                     List<DistrictDTO> resultDistrictName = locationService.checkDistrictNameDuplicate(commonInputDTO.getDistrictDTO().getDistName());
@@ -460,7 +481,7 @@ public class LocationCtrl {
             }
             int resultUpdateDistrict = locationService.updateDistrict(commonInputDTO.getDistrictDTO(), userName);
             if (resultUpdateDistrict != 1) {
-                res.setDescription(r.getResourceMessage("district.ư.fail"));
+                res.setDescription(r.getResourceMessage("district.update.fail"));
             } else {
                 res.setDescription(r.getResourceMessage("district.update.success"));
             }
@@ -509,8 +530,8 @@ public class LocationCtrl {
                 res.setDescription(r.getResourceMessage("district.check.id.delete"));
                 return res;
             }
-            int resultUpdateProvince = locationService.deleteDistrict(commonInputDTO.getDistrictDTO(), userName);
-            if (resultUpdateProvince != 1) {
+            int resultDeleteDistrict = locationService.deleteDistrict(commonInputDTO.getDistrictDTO(), userName);
+            if (resultDeleteDistrict != 1) {
                 res.setDescription(r.getResourceMessage("district.delete.fail"));
             } else {
                 res.setDescription(r.getResourceMessage("district.delete.success"));
@@ -559,11 +580,7 @@ public class LocationCtrl {
                 res.setDescription(r.getResourceMessage("district.check.id.delete"));
                 return res;
             }
-            int totalRecord = locationService.totalRecordSearch(commonInputDTO.getDataParams(), commonInputDTO.getCommuneDTO());
-            DataParams pageInfo = DataUtils.getPageInfo(commonInputDTO.getDataParams(), totalRecord);
-            commonInputDTO.setDataParams(pageInfo);
-            List<CommuneDTO> constructionItemDTOS = locationService.getListCommune(commonInputDTO.getDataParams(), commonInputDTO.getCommuneDTO());
-            res.setPageInfo(pageInfo);
+            List<CommuneDTO> constructionItemDTOS = locationService.getListCommune(commonInputDTO.getCommuneDTO());
             res.setData(constructionItemDTOS);
             res.setDescription(Constant.EXECUTION_MESSAGE.OK);
         } catch (Exception e) {
@@ -580,8 +597,22 @@ public class LocationCtrl {
         ResourceBundle r = new ResourceBundle(language);
         res.setErrorCode(Constant.EXECUTION_ERROR.SUCCESS);
         try {
-            List<CommuneDTO> listCommune = locationService.searchCommune(commonInputDTO.getCommuneDTO());
+            if (StringUtils.isStringNullOrEmpty(commonInputDTO.getDataParams().getCurrentPage()) || commonInputDTO.getDataParams().getCurrentPage() == 0) {
+                res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
+                res.setDescription(r.getResourceMessage("current.page.null"));
+                return res;
+            }
+            if (StringUtils.isStringNullOrEmpty(commonInputDTO.getDataParams().getPageLimit()) || commonInputDTO.getDataParams().getPageLimit() == 0) {
+                res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
+                res.setDescription(r.getResourceMessage("page.limit.null"));
+                return res;
+            }
+            int totalRecord = locationService.totalRecordSearchCommune(commonInputDTO.getDataParams(), commonInputDTO.getCommuneDTO());
+            DataParams pageInfo = DataUtils.getPageInfo(commonInputDTO.getDataParams(), totalRecord);
+            commonInputDTO.setDataParams(pageInfo);
+            List<CommuneDTO> listCommune = locationService.searchCommune(commonInputDTO.getDataParams(), commonInputDTO.getCommuneDTO());
             if (listCommune != null && !listCommune.isEmpty()) {
+                res.setPageInfo(pageInfo);
                 res.setData(listCommune);
                 res.setDescription(Constant.EXECUTION_MESSAGE.OK);
             } else {
@@ -596,106 +627,263 @@ public class LocationCtrl {
         }
         return res;
     }
-//    @PostMapping("updateCommune")
-//    public ExecutionResult updateCommune(@RequestHeader("Accept-Language") String language, @RequestBody CommonInputDTO commonInputDTO) {
-//        ExecutionResult res = new ExecutionResult();
-//        ResourceBundle r = new ResourceBundle(language);
-//        String userName = commonInputDTO.getUserName().split("----")[0];
-//        res.setErrorCode(Constant.EXECUTION_ERROR.SUCCESS);
-//        try {
-//            if (StringUtils.isStringNullOrEmpty(commonInputDTO.getCommuneDTO().getProId())) {
-//                res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-//                res.setDescription(r.getResourceMessage("province.name.null"));
-//                return res;
-//            }
-//            CommuneDTO resultDistrictStatus = locationService.checkDistrictStatus(commonInputDTO.getCommuneDTO());
-//            if (resultDistrictStatus != null) {
-//                if (resultDistrictStatus.getStatus() == 0) {
-//                    res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-//                    res.setDescription(r.getResourceMessage("district.check.status.update"));
-//                    return res;
-//                }
-//                if (resultDistrictStatus.getDistCode().equals(commonInputDTO.getDistrictDTO().getDistCode())) {
-//                    if (StringUtils.isStringNullOrEmpty(commonInputDTO.getDistrictDTO().getDistCode())) {
-//                        res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-//                        res.setDescription(r.getResourceMessage("district.code.null"));
-//                        return res;
-//                    }
-//                    ProvinceDTO province = new ProvinceDTO();
-//                    province.setProId(commonInputDTO.getDistrictDTO().getProId());
-//                    ProvinceDTO resultProvinceName = locationService.checkProvinceId(province);
-//                    if (resultProvinceName.getStatus() == 0) {
-//                        res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-//                        res.setDescription(r.getResourceMessage("province.check.id.delete"));
-//                        return res;
-//                    }
-//                    List<DistrictDTO> resultDistrictCode = locationService.checkDistrictCodeDuplicate(commonInputDTO.getDistrictDTO().getDistCode());
-//                    if (resultDistrictCode != null && !resultDistrictCode.isEmpty()) {
-//                        res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-//                        res.setDescription(r.getResourceMessage("district.code.duplicate"));
-//                        return res;
-//                    }
-//                    if (StringUtils.isStringNullOrEmpty(commonInputDTO.getDistrictDTO().getDistName())) {
-//                        res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-//                        res.setDescription(r.getResourceMessage("district.name.null"));
-//                        return res;
-//                    }
-//                    List<DistrictDTO> resultDistrictName = locationService.checkDistrictNameDuplicate(commonInputDTO.getDistrictDTO().getDistName());
-//                    if (resultDistrictName != null && !resultDistrictName.isEmpty()) {
-//                        res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-//                        res.setDescription(r.getResourceMessage("district.name.duplicate"));
-//                        return res;
-//                    }
-//                }
-//                if (resultDistrictStatus.getDistName().equals(commonInputDTO.getDistrictDTO().getDistName())) {
-//                    if (StringUtils.isStringNullOrEmpty(commonInputDTO.getDistrictDTO().getDistCode())) {
-//                        res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-//                        res.setDescription(r.getResourceMessage("district.code.null"));
-//                        return res;
-//                    }
-//                    ProvinceDTO province = new ProvinceDTO();
-//                    province.setProId(commonInputDTO.getDistrictDTO().getProId());
-//                    ProvinceDTO resultProvinceName = locationService.checkProvinceId(province);
-//                    if (resultProvinceName.getStatus() == 0) {
-//                        res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-//                        res.setDescription(r.getResourceMessage("province.check.id.delete"));
-//                        return res;
-//                    }
-//                    List<DistrictDTO> resultDistrictCode = locationService.checkDistrictCodeDuplicate(commonInputDTO.getDistrictDTO().getDistCode());
-//                    if (resultDistrictCode != null && !resultDistrictCode.isEmpty()) {
-//                        res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-//                        res.setDescription(r.getResourceMessage("district.code.duplicate"));
-//                        return res;
-//                    }
-//                    if (StringUtils.isStringNullOrEmpty(commonInputDTO.getDistrictDTO().getDistName())) {
-//                        res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-//                        res.setDescription(r.getResourceMessage("district.name.null"));
-//                        return res;
-//                    }
-//                    List<DistrictDTO> resultDistrictName = locationService.checkDistrictNameDuplicate(commonInputDTO.getDistrictDTO().getDistName());
-//                    if (resultDistrictName != null && !resultDistrictName.isEmpty()) {
-//                        res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-//                        res.setDescription(r.getResourceMessage("district.name.duplicate"));
-//                        return res;
-//                    }
-//                }
-//            } else {
-//                res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-//                res.setDescription(r.getResourceMessage("district.check.status.update"));
-//                return res;
-//            }
-//            int resultUpdateDistrict = locationService.updateDistrict(commonInputDTO.getDistrictDTO(), userName);
-//            if (resultUpdateDistrict != 1) {
-//                res.setDescription(r.getResourceMessage("district.ư.fail"));
-//            } else {
-//                res.setDescription(r.getResourceMessage("district.update.success"));
-//            }
-//            return res;
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-//            res.setDescription(r.getResourceMessage("system.error"));
-//            return res;
-//        }
-//    }
+
+    @PostMapping({"addCommune"})
+    public ExecutionResult addCommune(@RequestHeader("Accept-Language") String language, @RequestBody CommonInputDTO commonInputDTO) throws Exception {
+        ExecutionResult res = new ExecutionResult();
+        ResourceBundle r = new ResourceBundle(language);
+        String userName = commonInputDTO.getUserName().split("----")[0];
+        res.setErrorCode(Constant.EXECUTION_ERROR.SUCCESS);
+        try {
+            if (StringUtils.isStringNullOrEmpty(commonInputDTO.getCommuneDTO().getProId())) {
+                res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
+                res.setDescription(r.getResourceMessage("province.name.null"));
+                return res;
+            }
+            if (StringUtils.isStringNullOrEmpty(commonInputDTO.getCommuneDTO().getDistId())) {
+                res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
+                res.setDescription(r.getResourceMessage("district.name.null"));
+                return res;
+            }
+            if (StringUtils.isStringNullOrEmpty(commonInputDTO.getCommuneDTO().getCommuneCode())) {
+                res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
+                res.setDescription(r.getResourceMessage("commune.code.null"));
+                return res;
+            }
+            if (StringUtils.isStringNullOrEmpty(commonInputDTO.getCommuneDTO().getCommuneName())) {
+                res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
+                res.setDescription(r.getResourceMessage("commune.name.null"));
+                return res;
+            }
+            ProvinceDTO province = new ProvinceDTO();
+            province.setProId(commonInputDTO.getCommuneDTO().getProId());
+            ProvinceDTO resultProvinceName = locationService.checkProvinceId(province);
+            if (resultProvinceName.getStatus() == 0) {
+                res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
+                res.setDescription(r.getResourceMessage("province.check.id.delete"));
+                return res;
+            }
+            DistrictDTO district = new DistrictDTO();
+            district.setDistId(commonInputDTO.getCommuneDTO().getDistId());
+            DistrictDTO resultDistName = locationService.checkDistrictId(district);
+            if (resultDistName.getStatus() == 0) {
+                res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
+                res.setDescription(r.getResourceMessage("district.check.id.delete"));
+                return res;
+            }
+            List<CommuneDTO> resultCommuneCode = locationService.checkCommuneCodeDuplicate(commonInputDTO.getCommuneDTO().getCommuneCode());
+            if (resultCommuneCode != null && !resultCommuneCode.isEmpty()) {
+                res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
+                res.setDescription(r.getResourceMessage("commune.code.duplicate"));
+                return res;
+            }
+            List<CommuneDTO> resultCommuneName = locationService.checkCommuneNameDuplicate(commonInputDTO.getCommuneDTO().getCommuneName());
+            if (resultCommuneName != null && !resultCommuneName.isEmpty()) {
+                res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
+                res.setDescription(r.getResourceMessage("commune.name.duplicate"));
+                return res;
+            }
+            if (!StringUtils.isStringNullOrEmpty(commonInputDTO.getCommuneDTO())) {
+                Commune resultAddCommune = locationService.addCommune(commonInputDTO.getCommuneDTO(), userName);
+                if (resultAddCommune == null) {
+                    res.setDescription(r.getResourceMessage("commune.add.fail"));
+                } else {
+                    res.setDescription(r.getResourceMessage("commune.add.success"));
+                }
+                return res;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
+            res.setDescription(r.getResourceMessage("system.error"));
+        }
+        return res;
+    }
+
+    @PostMapping("updateCommune")
+    public ExecutionResult updateCommune(@RequestHeader("Accept-Language") String language, @RequestBody CommonInputDTO commonInputDTO) {
+        ExecutionResult res = new ExecutionResult();
+        ResourceBundle r = new ResourceBundle(language);
+        String userName = commonInputDTO.getUserName().split("----")[0];
+        res.setErrorCode(Constant.EXECUTION_ERROR.SUCCESS);
+        try {
+            if (StringUtils.isStringNullOrEmpty(commonInputDTO.getCommuneDTO().getProId())) {
+                res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
+                res.setDescription(r.getResourceMessage("province.name.null"));
+                return res;
+            }
+            if (StringUtils.isStringNullOrEmpty(commonInputDTO.getCommuneDTO().getDistId())) {
+                res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
+                res.setDescription(r.getResourceMessage("district.name.null"));
+                return res;
+            }
+            CommuneDTO resultCommuneStatus = locationService.checkCommuneStatus(commonInputDTO.getCommuneDTO());
+            if (resultCommuneStatus != null) {
+                if (resultCommuneStatus.getStatus() == 0) {
+                    res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
+                    res.setDescription(r.getResourceMessage("commune.check.status.update"));
+                    return res;
+                }
+                if (!resultCommuneStatus.getCommuneCode().equals(commonInputDTO.getCommuneDTO().getCommuneCode())) {
+                    if (StringUtils.isStringNullOrEmpty(commonInputDTO.getCommuneDTO().getCommuneCode())) {
+                        res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
+                        res.setDescription(r.getResourceMessage("commune.code.null"));
+                        return res;
+                    }
+                    ProvinceDTO province = new ProvinceDTO();
+                    province.setProId(commonInputDTO.getCommuneDTO().getProId());
+                    ProvinceDTO resultProvinceName = locationService.checkProvinceId(province);
+                    if (resultProvinceName.getStatus() == 0) {
+                        res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
+                        res.setDescription(r.getResourceMessage("province.check.id.delete"));
+                        return res;
+                    }
+                    DistrictDTO district = new DistrictDTO();
+                    district.setDistId(commonInputDTO.getCommuneDTO().getDistId());
+                    DistrictDTO resultDistName = locationService.checkDistrictId(district);
+                    if (resultDistName.getStatus() == 0) {
+                        res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
+                        res.setDescription(r.getResourceMessage("district.check.id.delete"));
+                        return res;
+                    }
+                    if (StringUtils.isStringNullOrEmpty(commonInputDTO.getCommuneDTO().getCommuneName())) {
+                        res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
+                        res.setDescription(r.getResourceMessage("commune.name.null"));
+                        return res;
+                    }
+                    List<CommuneDTO> resultCommuneCode = locationService.checkCommuneCodeDuplicate(commonInputDTO.getCommuneDTO().getCommuneCode());
+                    if (resultCommuneCode != null && !resultCommuneCode.isEmpty()) {
+                        res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
+                        res.setDescription(r.getResourceMessage("commune.code.duplicate"));
+                        return res;
+                    }
+                    List<CommuneDTO> resultCommuneName = locationService.checkCommuneNameDuplicate(commonInputDTO.getCommuneDTO().getCommuneName());
+                    if (resultCommuneName != null && !resultCommuneName.isEmpty()) {
+                        res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
+                        res.setDescription(r.getResourceMessage("commune.name.duplicate"));
+                        return res;
+                    }
+                }
+                if (!resultCommuneStatus.getCommuneName().equals(commonInputDTO.getCommuneDTO().getCommuneName())) {
+                    if (StringUtils.isStringNullOrEmpty(commonInputDTO.getCommuneDTO().getCommuneName())) {
+                        res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
+                        res.setDescription(r.getResourceMessage("commune.name.null"));
+                        return res;
+                    }
+                    ProvinceDTO province = new ProvinceDTO();
+                    province.setProId(commonInputDTO.getCommuneDTO().getProId());
+                    ProvinceDTO resultProvinceName = locationService.checkProvinceId(province);
+                    if (resultProvinceName.getStatus() == 0) {
+                        res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
+                        res.setDescription(r.getResourceMessage("province.check.id.delete"));
+                        return res;
+                    }
+                    DistrictDTO district = new DistrictDTO();
+                    district.setDistId(commonInputDTO.getCommuneDTO().getDistId());
+                    DistrictDTO resultDistName = locationService.checkDistrictId(district);
+                    if (resultDistName.getStatus() == 0) {
+                        res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
+                        res.setDescription(r.getResourceMessage("district.check.id.delete"));
+                        return res;
+                    }
+                    if (StringUtils.isStringNullOrEmpty(commonInputDTO.getCommuneDTO().getCommuneCode())) {
+                        res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
+                        res.setDescription(r.getResourceMessage("commune.code.null"));
+                        return res;
+                    }
+                    List<CommuneDTO> resultCommuneCode = locationService.checkCommuneCodeDuplicate(commonInputDTO.getCommuneDTO().getCommuneCode());
+                    if (resultCommuneCode != null && !resultCommuneCode.isEmpty()) {
+                        res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
+                        res.setDescription(r.getResourceMessage("commune.code.duplicate"));
+                        return res;
+                    }
+                    List<CommuneDTO> resultCommuneName = locationService.checkCommuneNameDuplicate(commonInputDTO.getCommuneDTO().getCommuneName());
+                    if (resultCommuneName != null && !resultCommuneName.isEmpty()) {
+                        res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
+                        res.setDescription(r.getResourceMessage("commune.name.duplicate"));
+                        return res;
+                    }
+                }
+            } else {
+                res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
+                res.setDescription(r.getResourceMessage("commune.check.status.update"));
+                return res;
+            }
+            int resultCommuneUpdate = locationService.updateCommune(commonInputDTO.getCommuneDTO(), userName);
+            if (resultCommuneUpdate != 1) {
+                res.setDescription(r.getResourceMessage("commune.update.fail"));
+            } else {
+                res.setDescription(r.getResourceMessage("commune.update.success"));
+            }
+            return res;
+        } catch (Exception e) {
+            e.printStackTrace();
+            res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
+            res.setDescription(r.getResourceMessage("system.error"));
+            return res;
+        }
+    }
+    @PostMapping("deleteCommune")
+    public ExecutionResult deleteCommune(@RequestHeader("Accept-Language") String language, @RequestBody CommonInputDTO commonInputDTO) {
+        ExecutionResult res = new ExecutionResult();
+        ResourceBundle r = new ResourceBundle(language);
+        String userName = commonInputDTO.getUserName().split("----")[0];
+        res.setErrorCode(Constant.EXECUTION_ERROR.SUCCESS);
+        try {
+            if (StringUtils.isStringNullOrEmpty(commonInputDTO.getCommuneDTO().getProId())) {
+                res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
+                res.setDescription(r.getResourceMessage("province.id.null"));
+                return res;
+            }
+            if (StringUtils.isStringNullOrEmpty(commonInputDTO.getCommuneDTO().getDistId())) {
+                res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
+                res.setDescription(r.getResourceMessage("district.id.null"));
+                return res;
+            }
+            if (StringUtils.isStringNullOrEmpty(commonInputDTO.getCommuneDTO())) {
+                res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
+                res.setDescription(r.getResourceMessage("commune.null"));
+                return res;
+            }
+            if (StringUtils.isStringNullOrEmpty(commonInputDTO.getCommuneDTO().getCommuneId())) {
+                res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
+                res.setDescription(r.getResourceMessage("commune.id.null"));
+                return res;
+            }
+            ProvinceDTO province = new ProvinceDTO();
+            province.setProId(commonInputDTO.getCommuneDTO().getProId());
+            ProvinceDTO resultProvinceName = locationService.checkProvinceId(province);
+            if (resultProvinceName.getStatus() == 0) {
+                res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
+                res.setDescription(r.getResourceMessage("province.check.id.delete"));
+                return res;
+            }
+            DistrictDTO district = new DistrictDTO();
+            district.setDistId(commonInputDTO.getCommuneDTO().getDistId());
+            DistrictDTO resultDistName = locationService.checkDistrictId(district);
+            if (resultDistName.getStatus() == 0) {
+                res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
+                res.setDescription(r.getResourceMessage("district.check.id.delete"));
+                return res;
+            }
+            CommuneDTO resultCommuneId = locationService.checkCommuneId(commonInputDTO.getCommuneDTO());
+            if (resultCommuneId.getStatus() == 0) {
+                res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
+                res.setDescription(r.getResourceMessage("commune.check.id.delete"));
+                return res;
+            }
+            int resultUpdateCommune = locationService.deleteCommune(commonInputDTO.getCommuneDTO(), userName);
+            if (resultUpdateCommune != 1) {
+                res.setDescription(r.getResourceMessage("commune.delete.fail"));
+            } else {
+                res.setDescription(r.getResourceMessage("commune.delete.success"));
+            }
+            return res;
+        } catch (Exception e) {
+            e.printStackTrace();
+            res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
+            res.setDescription(r.getResourceMessage("system.error"));
+            return res;
+        }
+    }
 }

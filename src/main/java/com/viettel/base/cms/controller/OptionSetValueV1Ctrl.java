@@ -117,15 +117,15 @@ public class OptionSetValueV1Ctrl {
         try {
             OptionSetValueV1DTO optionSetValueV1DTO =
                     commonInputDTO.getOptionSetValueV1DTO();
-            boolean isExists = optionSetValueV1Repo.existsByValueAndStatus(
-                    optionSetValueV1DTO.getValue(),
-                    1L
-            );
-            if (isExists) {
-                res.setDescription(r.getResourceMessage("cm.code.exists"));
-                res.setErrorCode("1");
-                return res;
-            }
+//            boolean isExists = optionSetValueV1Repo.existsByValueAndStatus(
+//                    optionSetValueV1DTO.getValue(),
+//                    1L
+//            );
+//            if (isExists) {
+//                res.setDescription(r.getResourceMessage("cm.code.exists"));
+//                res.setErrorCode("1");
+//                return res;
+//            }
 
             OptionSetValueV1 optionSetValueV1 = new OptionSetValueV1();
 

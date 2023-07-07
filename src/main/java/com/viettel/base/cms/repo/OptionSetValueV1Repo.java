@@ -13,7 +13,8 @@ import java.util.List;
 @Repository
 public interface OptionSetValueV1Repo extends JpaRepository<OptionSetValueV1, Long> {
     @Query(value = "select ops.value as value, ops.option_set_Id as optionSetId, ops.option_set_value_id as optionSetValueId, ops.name_vi as nameVi, ops.name_la as nameLa, ops.name_en as nameEn, ops.create_datetime as createDatetime, ops.create_by as createBy, " +
-            "op.option_set_code  as optionSetCode " +
+            "op.option_set_code  as optionSetCode, " +
+            "ops.description  as description " +
             "from option_set_value ops left join option_set op " +
             "on ops.option_set_id = op.option_set_id " +
             "where 1=1 " +

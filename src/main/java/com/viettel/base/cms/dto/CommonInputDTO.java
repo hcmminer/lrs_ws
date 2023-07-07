@@ -47,5 +47,6 @@ public class CommonInputDTO {
     private SearchV1DTO searchV1DTO;
     private OptionSetV1DTO optionSetV1DTO;
     private OptionSetValueV1DTO optionSetValueV1DTO;
+    private PriceRangeDTO priceRangeDTO;
 //    ..bandv
 }

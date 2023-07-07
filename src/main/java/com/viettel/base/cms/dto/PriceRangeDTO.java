@@ -18,12 +18,17 @@ public class PriceRangeDTO {
     private String priceCode;
     private String description;
     private Long amount;
-    private LocalDateTime startDate;
-    private LocalDateTime expiredDate;
+    private String startDate;
+    private String expiredDate;
     private LocalDateTime createDatetime;
     private String createBy;
     private LocalDateTime updateDatetime;
     private String updateBy;
+
+    private Long status;
+
+
+
 
 
 }

@@ -24,4 +24,5 @@ public class SearchV1DTO {
     private String value;
     private Long optionSetId;
     private Long optionSetValueId;
+    private String priceCode;
 }

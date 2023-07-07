@@ -37,10 +37,10 @@ public class PriceRange {
     private Long amount;
 
     @Column(name = "start_date")
-    private LocalDateTime startDate;
+    private String startDate;
 
     @Column(name = "expired_date")
-    private LocalDateTime expiredDate;
+    private String expiredDate;
 
     @Column(name = "create_datetime")
     private LocalDateTime createDatetime;
@@ -53,6 +53,9 @@ public class PriceRange {
 
     @Column(name = "update_by")
     private String updateBy;
+
+    @Column(name = "status")
+    private Long status;
 
 
 }

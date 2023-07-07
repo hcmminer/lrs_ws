@@ -98,12 +98,12 @@ public class OptionSetV1Ctrl {
         res.setErrorCode("0");
         try {
             OptionSetV1DTO optionSetV1DTO = commonInputDTO.getOptionSetV1DTO();
-            boolean isExists = optionSetV1Repo.existsByOptionSetCodeAndStatus(optionSetV1DTO.getOptionSetCode(), 1L);
-            if (isExists) {
-                res.setDescription(r.getResourceMessage("cm.code.exists"));
-                res.setErrorCode("1");
-                return res;
-            }
+//            boolean isExists = optionSetV1Repo.existsByOptionSetCodeAndStatus(optionSetV1DTO.getOptionSetCode(), 1L);
+//            if (isExists) {
+//                res.setDescription(r.getResourceMessage("cm.code.exists"));
+//                res.setErrorCode("1");
+//                return res;
+//            }
 
             OptionSetV1 optionSetV1 = new OptionSetV1();
 

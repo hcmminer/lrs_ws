@@ -74,22 +74,22 @@ public class LocationServiceImpl implements LocationService {
     }
 
     @Override
-    public List<ProvinceDTO> searchProvince(DataParams dataParams, String provinceName) throws Exception {
+    public List<ProvinceDTO> searchProvince(DataParams dataParams, ProvinceDTO provinceDTO) throws Exception {
         try {
             List<ProvinceDTO> lstResult = new ArrayList<>();
             String sql = " SELECT   " +
                     " pro_id, pro_name , pro_code  " +
                     " FROM  province  " +
                     " WHERE `status` = 1 " ;
-            if (!StringUtils.isStringNullOrEmpty(provinceName))
+            if (!StringUtils.isStringNullOrEmpty(provinceDTO.getProName()))
                 sql = sql + " AND LOWER(pro_name) LIKE LOWER(:provinceName) ";
             sql = sql + " LIMIT :start_row, :page_limit ";
             Query query = this.cms.createNativeQuery(sql);
             if (!StringUtils.isStringNullOrEmpty(dataParams))
                 query.setParameter("start_row", dataParams.getStartRow());
             query.setParameter("page_limit", dataParams.getPageLimit());
-            if (!StringUtils.isStringNullOrEmpty(provinceName))
-                query.setParameter("provinceName", "%" + provinceName + "%");
+            if (!StringUtils.isStringNullOrEmpty(provinceDTO.getProName()))
+                query.setParameter("provinceName", "%" + provinceDTO.getProName() + "%");
             List<Object[]> lst = query.getResultList();
             if (!lst.isEmpty() && lst != null)
                 for (Object[] obj : lst) {
@@ -108,17 +108,17 @@ public class LocationServiceImpl implements LocationService {
     }
 
     @Override
-    public int totalRecordSearchProvince(DataParams dataParams, String provinceName) throws Exception {
+    public int totalRecordSearchProvince(DataParams dataParams, ProvinceDTO provinceDTO) throws Exception {
         try {
             String sql = " SELECT   " +
                     "      count(*)" +
                     " FROM  province  " +
                     " WHERE `status` = 1 ";
-            if (!StringUtils.isStringNullOrEmpty(provinceName))
+            if (!StringUtils.isStringNullOrEmpty(provinceDTO.getProName()))
                 sql = sql + " AND LOWER(pro_name) LIKE LOWER(:provinceName) ";
             Query query = this.cms.createNativeQuery(sql);
-            if (!StringUtils.isStringNullOrEmpty(provinceName))
-                query.setParameter("provinceName", "%" + provinceName + "%");
+            if (!StringUtils.isStringNullOrEmpty(provinceDTO.getProName()))
+                query.setParameter("provinceName", "%" + provinceDTO.getProName() + "%");
             return ((Number) query.getSingleResult()).intValue();
         } catch (
                 Exception e) {
@@ -309,7 +309,7 @@ public class LocationServiceImpl implements LocationService {
     }
 
     @Override
-    public List<DistrictDTO> getListDistrict(ProvinceDTO provinceDTO) throws Exception {
+    public List<DistrictDTO> getListDistrict(DistrictDTO districtDTO) throws Exception {
         try {
             List<DistrictDTO> lstResult = new ArrayList<>();
             String sql = " SELECT   " +
@@ -319,16 +319,16 @@ public class LocationServiceImpl implements LocationService {
                     " AND LOWER (p.pro_code) = LOWER (:proCode) " +
                     " order by pd.dist_name";
             Query query = this.cms.createNativeQuery(sql);
-            query.setParameter("proCode", provinceDTO.getProCode());
+            query.setParameter("proCode", "%" + districtDTO.getProCode() + "%");
             List<Object[]> lst = query.getResultList();
             if (!lst.isEmpty() && lst != null)
                 for (Object[] obj : lst) {
                     int i = 0;
-                    DistrictDTO districtDTO = new DistrictDTO();
-                    districtDTO.setDistId(Long.valueOf(obj[i++].toString()));
-                    districtDTO.setProId(Long.valueOf(obj[i++].toString()));
-                    districtDTO.setDistName(obj[i++].toString());
-                    lstResult.add(districtDTO);
+                    DistrictDTO district = new DistrictDTO();
+                    district.setDistId(Long.valueOf(obj[i++].toString()));
+                    district.setProId(Long.valueOf(obj[i++].toString()));
+                    district.setDistName(obj[i++].toString());
+                    lstResult.add(district);
                 }
             return lstResult;
         } catch (Exception e) {
@@ -650,6 +650,10 @@ public class LocationServiceImpl implements LocationService {
                     "      p.status = 1 " +
                     " AND " +
                     "      d.status = 1 " ;
+            if (!StringUtils.isStringNullOrEmpty(communeDTO.getProId()))
+                sql = sql + " AND e.PROVINCE_ID = :provinceId";
+            if (!StringUtils.isStringNullOrEmpty(communeDTO.getDistId()))
+                sql = sql + " AND e.DISTRICT_ID = :districtId";
             if (!StringUtils.isStringNullOrEmpty(communeDTO.getCommuneName()))
                 sql = sql + " AND LOWER(NAME) LIKE LOWER(:communeName) ";
             sql = sql + " LIMIT :start_row, :page_limit ";
@@ -657,6 +661,10 @@ public class LocationServiceImpl implements LocationService {
             if (!StringUtils.isStringNullOrEmpty(dataParams))
                 query.setParameter("start_row", dataParams.getStartRow());
             query.setParameter("page_limit", dataParams.getPageLimit());
+            if (!StringUtils.isStringNullOrEmpty(communeDTO.getProId()))
+                query.setParameter("provinceId", communeDTO.getProId());
+            if (!StringUtils.isStringNullOrEmpty(communeDTO.getDistId()))
+                query.setParameter("districtId", communeDTO.getDistId());
             if (!StringUtils.isStringNullOrEmpty(communeDTO.getCommuneName()))
                 query.setParameter("communeName", "%" + communeDTO.getCommuneName() + "%");
             List<Object[]> lst = query.getResultList();
@@ -694,11 +702,19 @@ public class LocationServiceImpl implements LocationService {
                     "      p.status = 1 " +
                     " AND " +
                     "      d.status = 1 ";
+            if (!StringUtils.isStringNullOrEmpty(communeDTO.getProId()))
+                sql = sql + " AND e.PROVINCE_ID = :provinceId";
+            if (!StringUtils.isStringNullOrEmpty(communeDTO.getDistId()))
+                sql = sql + " AND e.DISTRICT_ID = :districtId";
             if (!StringUtils.isStringNullOrEmpty(communeDTO.getCommuneName()))
                 sql = sql + " AND LOWER(NAME) LIKE LOWER(:communeName) ";
             Query query = this.cms.createNativeQuery(sql);
             if (!StringUtils.isStringNullOrEmpty(communeDTO.getCommuneName()))
                 query.setParameter("communeName", "%" + communeDTO.getCommuneName() + "%");
+            if (!StringUtils.isStringNullOrEmpty(communeDTO.getProId()))
+                query.setParameter("provinceId", communeDTO.getProId());
+            if (!StringUtils.isStringNullOrEmpty(communeDTO.getDistId()))
+                query.setParameter("districtId", communeDTO.getDistId());
             return ((Number) query.getSingleResult()).intValue();
         } catch (
                 Exception e) {

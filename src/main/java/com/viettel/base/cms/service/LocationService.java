@@ -12,8 +12,8 @@ import java.util.List;
 
 public interface LocationService {
     List<ProvinceDTO> getListProvince() throws Exception;
-    List<ProvinceDTO> searchProvince(DataParams dataParams, String paramString) throws Exception;
-    int totalRecordSearchProvince(DataParams dataParams, String provinceName ) throws Exception;
+    List<ProvinceDTO> searchProvince(DataParams dataParams, ProvinceDTO provinceDTO) throws Exception;
+    int totalRecordSearchProvince(DataParams dataParams, ProvinceDTO provinceDTO ) throws Exception;
     Province addProvince(ProvinceDTO paramProvinceDTO, String paramString) throws Exception;
     List<ProvinceDTO> checkProvinceCodeDuplicate(String paramString) throws Exception;
     List<ProvinceDTO> checkProvinceNameDuplicate(String paramString) throws Exception;
@@ -21,7 +21,7 @@ public interface LocationService {
     int updateProvince(ProvinceDTO paramProvinceDTO, String paramString) throws Exception;
     int deleteProvince(ProvinceDTO paramProvinceDTO, String paramString) throws Exception;
     ProvinceDTO checkProvinceId(ProvinceDTO paramProvinceDTO) throws Exception;
-    List<DistrictDTO> getListDistrict(ProvinceDTO provinceDTO) throws Exception;
+    List<DistrictDTO> getListDistrict(DistrictDTO districtDTO) throws Exception;
     List<DistrictDTO> searchDistrict(DataParams dataParams, DistrictDTO districtDTO) throws Exception;
     int totalRecordSearchDistrict(DataParams dataParams, DistrictDTO districtDTO) throws Exception;
     District addDistrict(DistrictDTO districtDTO, String userName) throws Exception;

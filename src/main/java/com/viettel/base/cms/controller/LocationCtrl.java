@@ -60,10 +60,10 @@ public class LocationCtrl {
                 res.setDescription(r.getResourceMessage("page.limit.null"));
                 return res;
             }
-            int totalRecord = locationService.totalRecordSearchProvince(commonInputDTO.getDataParams(), commonInputDTO.getProvinceDTO().getProName());
+            int totalRecord = locationService.totalRecordSearchProvince(commonInputDTO.getDataParams(), commonInputDTO.getProvinceDTO());
             DataParams pageInfo = DataUtils.getPageInfo(commonInputDTO.getDataParams(), totalRecord);
             commonInputDTO.setDataParams(pageInfo);
-            List<ProvinceDTO> listProvince = locationService.searchProvince(commonInputDTO.getDataParams(), commonInputDTO.getProvinceDTO().getProName());
+            List<ProvinceDTO> listProvince = locationService.searchProvince(commonInputDTO.getDataParams(), commonInputDTO.getProvinceDTO());
             if (listProvince != null && !listProvince.isEmpty()) {
                 res.setPageInfo(pageInfo);
                 res.setData(listProvince);
@@ -277,13 +277,13 @@ public class LocationCtrl {
         res.setErrorCode(Constant.EXECUTION_ERROR.SUCCESS);
         try {
 
-            if (StringUtils.isStringNullOrEmpty(commonInputDTO.getProvinceDTO()) ||
-                    StringUtils.isStringNullOrEmpty(commonInputDTO.getProvinceDTO().getProCode())) {
+            if (StringUtils.isStringNullOrEmpty(commonInputDTO.getDistrictDTO()) ||
+                    StringUtils.isStringNullOrEmpty(commonInputDTO.getDistrictDTO().getProCode())) {
                 res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
                 res.setDescription(r.getResourceMessage("province.info.null"));
                 return res;
             }
-            List<DistrictDTO> constructionItemDTOS = locationService.getListDistrict(commonInputDTO.getProvinceDTO());
+            List<DistrictDTO> constructionItemDTOS = locationService.getListDistrict(commonInputDTO.getDistrictDTO());
             res.setData(constructionItemDTOS);
             res.setDescription(Constant.EXECUTION_MESSAGE.OK);
         } catch (Exception e) {

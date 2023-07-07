@@ -287,10 +287,10 @@ public class LocationServiceImpl implements LocationService {
                     " pd.dist_id,   pd.pro_id,   pd.dist_name   " +
                     " FROM   province_district pd, province p " +
                     " WHERE pd.pro_id = p.pro_id " +
-                    " AND LOWER (p.pro_code) = LOWER (:proCode) " +
+                    " AND p.pro_id = :proId " +
                     " order by pd.dist_name";
             Query query = this.cms.createNativeQuery(sql);
-            query.setParameter("proCode", provinceDTO.getProCode());
+            query.setParameter("proId", provinceDTO.getProId());
             List<Object[]> lst = query.getResultList();
             if (!lst.isEmpty() && lst != null)
                 for (Object[] obj : lst) {

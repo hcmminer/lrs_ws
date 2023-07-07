@@ -271,7 +271,7 @@ public class LocationCtrl {
         try {
 
             if (StringUtils.isStringNullOrEmpty(commonInputDTO.getProvinceDTO()) ||
-                    StringUtils.isStringNullOrEmpty(commonInputDTO.getProvinceDTO().getProCode())) {
+                    StringUtils.isStringNullOrEmpty(commonInputDTO.getProvinceDTO().getProId())) {
                 res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
                 res.setDescription(r.getResourceMessage("province.info.null"));
                 return res;

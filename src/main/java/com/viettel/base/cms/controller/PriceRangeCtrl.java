@@ -3,6 +3,7 @@ package com.viettel.base.cms.controller;
 import com.viettel.base.cms.common.Constant;
 import com.viettel.base.cms.dto.CommonInputDTO;
 import com.viettel.base.cms.dto.PriceRangeDTO;
+import com.viettel.base.cms.interfaces.*;
 import com.viettel.base.cms.model.PriceRange;
 import com.viettel.base.cms.repo.PriceRangeRepo;
 import com.viettel.vfw5.base.dto.ExecutionResult;
@@ -35,7 +36,7 @@ public class PriceRangeCtrl {
         ResourceBundle r = new ResourceBundle(language);
         res.setErrorCode("0");
         try {
-            List<PriceRange> list = priceRangeRepo.findAllByPriceCodeAndStatus(StringUtils.trimWhitespace(commonInputDTO.getSearchV1DTO().getPriceCode()), 1L);
+            List<IPriceRange> list = priceRangeRepo.findAllByPriceCodeAndStatusNavite(StringUtils.trimWhitespace(commonInputDTO.getSearchV1DTO().getPriceCode()), 1L);
             res.setData(list);
             return res;
         } catch (Exception e) {

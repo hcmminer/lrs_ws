@@ -36,7 +36,7 @@ public class PriceRangeCtrl {
         ResourceBundle r = new ResourceBundle(language);
         res.setErrorCode("0");
         try {
-            List<IPriceRange> list = priceRangeRepo.findAllByPriceCodeAndStatusNavite(StringUtils.trimWhitespace(commonInputDTO.getSearchV1DTO().getPriceCode()), 1L);
+            List<IPriceRange> list = priceRangeRepo.findAllByProvinceIdAndOptionSetValueIdAndStatus( commonInputDTO.getSearchV1DTO().getProvinceId(), commonInputDTO.getSearchV1DTO().getOptionSetValueId(), 1L);
             res.setData(list);
             return res;
         } catch (Exception e) {

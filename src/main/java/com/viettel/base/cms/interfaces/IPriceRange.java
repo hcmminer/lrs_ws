@@ -17,4 +17,8 @@ public interface IPriceRange {
      String getUpdateBy();
 
      Long getstatus();
+
+     //extend
+     String getProvinceCode();
+     String getAreaCode();
 }

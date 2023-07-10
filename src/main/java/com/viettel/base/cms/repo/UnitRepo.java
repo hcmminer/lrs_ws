@@ -24,6 +24,7 @@ public interface UnitRepo extends JpaRepository<Unit, Long> {
             "           where\n" +
             "                  p.pro_id = un.province_id ) as provinceName,\n" +
             " un.create_datetime as createDatetime," +
+            " un.unit_code as unitCode," +
             " un.unit_name_vi as unitNameVi," +
             " un.unit_name_en as unitNameEn," +
             " un.unit_name_la as unitNameLa," +
@@ -32,19 +33,20 @@ public interface UnitRepo extends JpaRepository<Unit, Long> {
             " FROM unit un" +
             " WHERE " +
             " (:provinceId is null or nvl(un.PROVINCE_ID,'') = :provinceId)" +
-            " (:unitName is null " +
+            " and (:unitName is null " +
             "or (case " +
             "   when :lang = 'vi' then nvl(un.unit_name_vi,'') " +
             "   when :lang = 'en' then nvl(un.unit_name_en,'') " +
             "   when :lang = 'la' then nvl(un.unit_name_la,'') " +
+            " else nvl(un.unit_name_vi,'') " +
+            " end " +
             " ) like %:unitName%)" +
             " and un.status = :status"
             , nativeQuery = true)
     List<IUnit> findAllByProvinceIdAndUnitNameAndStatus(Long provinceId, String unitName, Long status, String lang);
 
 
-    boolean existsByUnitCodeOrUnitNameViOrUnitNameEnOrUnitNameLaAndProvinceIdAndStatus(String unitCode,String unitNameVi ,String unitNameEn, String unitNameLa,Long provinceId, Long status);
-
+    boolean existsByUnitCodeOrUnitNameViOrUnitNameEnOrUnitNameLaAndProvinceIdAndStatus(String unitCode, String unitNameVi, String unitNameEn, String unitNameLa, Long provinceId, Long status);
 
 
     List<Unit> findAllByUnitIdNotAndStatus(Long unitId, Long status);

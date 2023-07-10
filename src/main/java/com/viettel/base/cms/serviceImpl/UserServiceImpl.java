@@ -125,6 +125,13 @@ public class UserServiceImpl implements UserService {
                             subMenu3.setOrd(3L);
                             subMenus0.add(2,subMenu3);
                             //
+                            SubMenu subMenu4 = new SubMenu();
+                            subMenu4.setTitle("unitManager");
+                            subMenu4.setBullet("dot");
+                            subMenu4.setPage("/config-system/unit");
+                            subMenu4.setOrd(4L);
+                            subMenus0.add(3,subMenu4);
+                            //
                             menuParent.setSubmenu(subMenus0);
 
                         }

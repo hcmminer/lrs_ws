@@ -6,6 +6,7 @@ import com.viettel.base.cms.dto.OptionSetV1DTO;
 import com.viettel.base.cms.dto.SearchV1DTO;
 import com.viettel.base.cms.model.OptionSetV1;
 import com.viettel.base.cms.model.OptionSetValueV1;
+import com.viettel.base.cms.model.PriceRange;
 import com.viettel.base.cms.model.Staff;
 import com.viettel.base.cms.repo.OptionSetV1Repo;
 import com.viettel.base.cms.service.UserService;
@@ -20,8 +21,10 @@ import org.springframework.web.bind.annotation.*;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(value = "/api")
@@ -98,12 +101,22 @@ public class OptionSetV1Ctrl {
         res.setErrorCode("0");
         try {
             OptionSetV1DTO optionSetV1DTO = commonInputDTO.getOptionSetV1DTO();
-//            boolean isExists = optionSetV1Repo.existsByOptionSetCodeAndStatus(optionSetV1DTO.getOptionSetCode(), 1L);
-//            if (isExists) {
-//                res.setDescription(r.getResourceMessage("cm.code.exists"));
-//                res.setErrorCode("1");
-//                return res;
-//            }
+
+            List<OptionSetV1> listRest = optionSetV1Repo.findAllByOptionSetIdNotAndStatus(optionSetV1DTO.getOptionSetId(), 1L);
+
+            List<OptionSetV1> listFilter = new ArrayList<>();
+
+
+            listFilter = listRest.stream().filter(item -> item.getOptionSetCode().equals(optionSetV1DTO.getOptionSetCode()) ).collect(Collectors.toList());
+
+
+            if (listFilter.size() > 0) {
+                res.setDescription(r.getResourceMessage("cm.code.exists"));
+                res.setErrorCode("1");
+                return res;
+            }
+
+
 
             OptionSetV1 optionSetV1 = new OptionSetV1();
 

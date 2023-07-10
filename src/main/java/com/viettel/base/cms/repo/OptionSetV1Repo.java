@@ -12,5 +12,7 @@ public interface OptionSetV1Repo extends JpaRepository<OptionSetV1, Long> {
     @Query("select o from OptionSetV1 o where  (:optionSetCode is null or trim(o.optionSetCode) like %:optionSetCode%) and o.status = :status order by o.createDatetime desc ")
     List<OptionSetV1> findAllByOptionSetCodeAndStatus(String optionSetCode, Long status);
 
+    List<OptionSetV1> findAllByOptionSetIdNotAndStatus(Long optionSetId, Long status);
+
     boolean existsByOptionSetCodeAndStatus(String optionSetCode, Long status);
 }

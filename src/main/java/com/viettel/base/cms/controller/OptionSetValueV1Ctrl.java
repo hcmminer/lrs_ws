@@ -4,6 +4,7 @@ import com.viettel.base.cms.interfaces.*;
 import com.viettel.base.cms.common.Constant;
 import com.viettel.base.cms.dto.CommonInputDTO;
 import com.viettel.base.cms.dto.OptionSetValueV1DTO;
+import com.viettel.base.cms.model.OptionSetV1;
 import com.viettel.base.cms.model.OptionSetValueV1;
 import com.viettel.base.cms.repo.OptionSetValueV1Repo;
 import com.viettel.base.cms.service.UserService;
@@ -12,8 +13,10 @@ import com.viettel.vfw5.base.utils.DataUtils;
 import com.viettel.vfw5.base.utils.ResourceBundle;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
@@ -117,15 +120,20 @@ public class OptionSetValueV1Ctrl {
         try {
             OptionSetValueV1DTO optionSetValueV1DTO =
                     commonInputDTO.getOptionSetValueV1DTO();
-//            boolean isExists = optionSetValueV1Repo.existsByValueAndStatus(
-//                    optionSetValueV1DTO.getValue(),
-//                    1L
-//            );
-//            if (isExists) {
-//                res.setDescription(r.getResourceMessage("cm.code.exists"));
-//                res.setErrorCode("1");
-//                return res;
-//            }
+
+            List<OptionSetValueV1> listRest = optionSetValueV1Repo.findAllByOptionSetValueIdNotAndStatus(optionSetValueV1DTO.getOptionSetValueId(), 1L);
+
+            List<OptionSetValueV1> listFilter = new ArrayList<>();
+
+
+            listFilter = listRest.stream().filter(item -> item.getValue().equals(optionSetValueV1DTO.getValue())).collect(Collectors.toList());
+
+
+            if (listFilter.size() > 0) {
+                res.setDescription(r.getResourceMessage("cm.code.exists"));
+                res.setErrorCode("1");
+                return res;
+            }
 
             OptionSetValueV1 optionSetValueV1 = new OptionSetValueV1();
 

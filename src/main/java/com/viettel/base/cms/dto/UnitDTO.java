@@ -11,7 +11,9 @@ import java.time.LocalDateTime;
 public class UnitDTO {
     private Long unitId;
     private String unitCode;
-    private String unitName;
+    private String unitNameVi;
+    private String unitNameEn;
+    private String unitNameLa;
     private Long provinceId;
     private String createBy;
     private LocalDateTime createDatetime;

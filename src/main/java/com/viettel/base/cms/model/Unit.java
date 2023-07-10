@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -19,8 +20,14 @@ public class Unit {
     @Column(name = "unit_code")
     private String unitCode;
 
-    @Column(name = "unit_name")
-    private String unitName;
+    @Column(name = "unit_name_vi")
+    private String unitNameVi;
+
+    @Column(name = "unit_name_en")
+    private String unitNameEn;
+
+    @Column(name = "unit_name_la")
+    private String unitNameLa;
 
     @Column(name = "province_id")
     private Long provinceId;

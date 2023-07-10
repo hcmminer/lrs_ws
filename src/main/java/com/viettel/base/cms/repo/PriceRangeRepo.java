@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 import com.viettel.base.cms.model.PriceRange;
 
 import java.util.List;
+import java.util.Optional;
 
 
 @Repository
@@ -52,11 +53,15 @@ public interface PriceRangeRepo extends JpaRepository<PriceRange, Long> {
             " and (:areaId is null or nvl(pr.option_set_value_id,'') = :areaId)" +
             " and pr.status = :status"
             , nativeQuery = true)
-    List<IPriceRange> findAllByProvinceIdAndOptionSetValueIdAndStatus(Long provinceId,Long areaId, Long status);
+    List<IPriceRange> findAllByProvinceIdAndOptionSetValueIdAndStatus(Long provinceId, Long areaId, Long status);
 
-//    @Query("select a from PriceRange a where (:priceCode is null or a.priceCode like %:priceCode%) and a.status = :status")
-//    List<PriceRange> findAllByPriceCodeAndStatus(String priceCode, Long status);
 
     boolean existsByOptionSetValueIdAndProvinceIdAndStatus(Long optionSetValueId, Long provinceId, Long status);
+
+
+    Optional<PriceRange> findByPriceRangeIdAndStatus(Long priceRangeId, Long status);
+
+
+    List<PriceRange> findAllByPriceRangeIdNotAndStatus(Long priceRangeId, Long status);
 
 }

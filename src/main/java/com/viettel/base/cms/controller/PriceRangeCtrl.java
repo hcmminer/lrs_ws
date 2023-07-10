@@ -17,8 +17,10 @@ import org.springframework.web.bind.annotation.*;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(value = "/api")
@@ -31,12 +33,12 @@ public class PriceRangeCtrl {
 
     @PostMapping(value = "/listPriceRange")
     public ExecutionResult listPriceRange(@RequestHeader("Accept-Language") String language,
-                                         @RequestBody CommonInputDTO commonInputDTO) {
+                                          @RequestBody CommonInputDTO commonInputDTO) {
         ExecutionResult res = new ExecutionResult();
         ResourceBundle r = new ResourceBundle(language);
         res.setErrorCode("0");
         try {
-            List<IPriceRange> list = priceRangeRepo.findAllByProvinceIdAndOptionSetValueIdAndStatus( commonInputDTO.getSearchV1DTO().getProvinceId(), commonInputDTO.getSearchV1DTO().getOptionSetValueId(), 1L);
+            List<IPriceRange> list = priceRangeRepo.findAllByProvinceIdAndOptionSetValueIdAndStatus(commonInputDTO.getSearchV1DTO().getProvinceId(), commonInputDTO.getSearchV1DTO().getOptionSetValueId(), 1L);
             res.setData(list);
             return res;
         } catch (Exception e) {
@@ -49,13 +51,13 @@ public class PriceRangeCtrl {
 
     @PostMapping(value = "/addPriceRange")
     public ExecutionResult addPriceRange(@RequestHeader("Accept-Language") String language,
-                                        @RequestBody CommonInputDTO commonInputDTO) {
+                                         @RequestBody CommonInputDTO commonInputDTO) {
         ExecutionResult res = new ExecutionResult();
         ResourceBundle r = new ResourceBundle(language);
         res.setErrorCode("0");
         try {
             PriceRangeDTO priceRangeDTO = commonInputDTO.getPriceRangeDTO();
-            boolean isExists = priceRangeRepo.existsByOptionSetValueIdAndProvinceIdAndStatus(priceRangeDTO.getOptionSetValueId() ,priceRangeDTO.getProvinceId(), 1L);
+            boolean isExists = priceRangeRepo.existsByOptionSetValueIdAndProvinceIdAndStatus(priceRangeDTO.getOptionSetValueId(), priceRangeDTO.getProvinceId(), 1L);
             if (isExists) {
                 res.setDescription(r.getResourceMessage("cm.code.exists"));
                 res.setErrorCode("1");
@@ -83,13 +85,27 @@ public class PriceRangeCtrl {
 
     @PostMapping(value = "/editPriceRange")
     public ExecutionResult editPriceRange(@RequestHeader("Accept-Language") String language,
-                                         @RequestBody CommonInputDTO commonInputDTO) {
+                                          @RequestBody CommonInputDTO commonInputDTO) {
         ExecutionResult res = new ExecutionResult();
         ResourceBundle r = new ResourceBundle(language);
         res.setErrorCode("0");
         try {
             PriceRangeDTO priceRangeDTO = commonInputDTO.getPriceRangeDTO();
 
+
+            List<PriceRange> listRest = priceRangeRepo.findAllByPriceRangeIdNotAndStatus(priceRangeDTO.getPriceRangeId(), 1L);
+
+            List<PriceRange> listFilter = new ArrayList<>();
+
+
+            listFilter = listRest.stream().filter(item -> item.getProvinceId().equals(priceRangeDTO.getProvinceId()) && item.getOptionSetValueId().equals(priceRangeDTO.getOptionSetValueId())).collect(Collectors.toList());
+
+
+            if (listFilter.size() > 0) {
+                res.setDescription(r.getResourceMessage("cm.code.exists"));
+                res.setErrorCode("1");
+                return res;
+            }
 
             PriceRange priceRange = new PriceRange();
 
@@ -112,13 +128,13 @@ public class PriceRangeCtrl {
 
     @PostMapping(value = "/delPriceRange")
     public ExecutionResult delPriceRange(@RequestHeader("Accept-Language") String language,
-                                        @RequestBody CommonInputDTO commonInputDTO) {
+                                         @RequestBody CommonInputDTO commonInputDTO) {
         ExecutionResult res = new ExecutionResult();
         ResourceBundle r = new ResourceBundle(language);
         res.setErrorCode("0");
         try {
             PriceRangeDTO priceRangeDTO = commonInputDTO.getPriceRangeDTO();
-            boolean isExists = priceRangeRepo.existsByOptionSetValueIdAndProvinceIdAndStatus(priceRangeDTO.getOptionSetValueId() ,priceRangeDTO.getProvinceId(), 1L);
+            boolean isExists = priceRangeRepo.existsByOptionSetValueIdAndProvinceIdAndStatus(priceRangeDTO.getOptionSetValueId(), priceRangeDTO.getProvinceId(), 1L);
             if (isExists) {
                 res.setDescription(r.getResourceMessage("cm.code.exists"));
                 res.setErrorCode("1");

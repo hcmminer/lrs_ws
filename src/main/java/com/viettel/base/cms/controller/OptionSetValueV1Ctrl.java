@@ -91,7 +91,7 @@ public class OptionSetValueV1Ctrl {
             BeanUtils.copyProperties(optionSetValueV1DTO, optionSetValueV1);
 
             optionSetValueV1.setOptionSetValueId(
-                    DataUtils.getSequence(cms, "option_set_seq")
+                    DataUtils.getSequence(cms, "option_set_value_seq")
             );
             optionSetValueV1.setCreateBy(
                     commonInputDTO.getUserName().split("----")[0]

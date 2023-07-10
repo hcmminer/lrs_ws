@@ -26,4 +26,6 @@ public class SearchV1DTO {
     private String priceCode;
     private Long provinceId;
     private Long optionSetValueId;
+    private String unitName;
+
 }

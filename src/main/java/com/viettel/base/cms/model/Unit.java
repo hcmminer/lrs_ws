@@ -38,5 +38,8 @@ public class Unit {
     @Column(name = "create_datetime")
     private LocalDateTime createDatetime;
 
+    @Column(name = "status")
+    private Long status;
+
 
 }

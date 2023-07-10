@@ -17,5 +17,7 @@ public class UnitDTO {
     private Long provinceId;
     private String createBy;
     private LocalDateTime createDatetime;
+    private Long status;
+
 
 }

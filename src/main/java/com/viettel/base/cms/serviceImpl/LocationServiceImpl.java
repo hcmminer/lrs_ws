@@ -312,14 +312,14 @@ public class LocationServiceImpl implements LocationService {
     public List<DistrictDTO> getListDistrict(DistrictDTO districtDTO) throws Exception {
         try {
             List<DistrictDTO> lstResult = new ArrayList<>();
-            String sql = " SELECT   " +
-                    " pd.dist_id,   pd.pro_id,   pd.dist_name   " +
-                    " FROM   province_district pd, province p " +
-                    " WHERE pd.pro_id = p.pro_id " +
-                    " AND LOWER (p.pro_code) = LOWER (:proCode) " +
-                    " order by pd.dist_name";
+            String sql = " \t SELECT    " +
+                    " d.district_id,   d.province_id,   d.DISTRICT_NAME    " +
+                    " FROM   district d, province p  " +
+                    " WHERE d.PROVINCE_ID  = p.pro_id  " +
+                    " AND p.pro_id  = :proId " +
+                    " order by d.DISTRICT_NAME  ";
             Query query = this.cms.createNativeQuery(sql);
-            query.setParameter("proCode", "%" + districtDTO.getProCode() + "%");
+            query.setParameter("proId",  districtDTO.getProId());
             List<Object[]> lst = query.getResultList();
             if (!lst.isEmpty() && lst != null)
                 for (Object[] obj : lst) {
@@ -342,7 +342,7 @@ public class LocationServiceImpl implements LocationService {
         try {
             List<DistrictDTO> lstResult = new ArrayList<>();
             String sql = " SELECT   " +
-                    " p.pro_id, d.DISTRICT_ID, d.DISTRICT_NAME, p.pro_code, p.pro_name, d.DISTRICT_CODE  " +
+                    " p.pro_id, d.DISTRICT_ID, d.DISTRICT_NAME, p.pro_code, p.pro_name, d.DISTRICT_CODE , p.pro_code " +
                     " FROM  province p, district d " +
                     " WHERE " +
                     " p.pro_id = d.PROVINCE_ID " +
@@ -637,7 +637,7 @@ public class LocationServiceImpl implements LocationService {
         try {
             List<CommuneDTO> lstResult = new ArrayList<>();
             String sql = " SELECT   " +
-                    "      p.pro_id, d.DISTRICT_ID, e.CODE, e.NAME " +
+                    "      p.pro_id, d.DISTRICT_ID, e.CODE, e.NAME , p.pro_code , d.district_code, e.id , p.pro_name , d.district_name " +
                     " FROM  " +
                     "      province p, district d, commune e" +
                     " WHERE " +
@@ -676,6 +676,11 @@ public class LocationServiceImpl implements LocationService {
                     com.setDistId(Long.valueOf(obj[i++].toString()));
                     com.setCommuneCode(obj[i++].toString());
                     com.setCommuneName(obj[i++].toString());
+                    com.setProCode(obj[i++].toString());
+                    com.setDistrictCode(obj[i++].toString());
+                    com.setCommuneId(Long.valueOf(obj[i++].toString()));
+                    com.setProName(obj[i++].toString());
+                    com.setDistrictName(obj[i++].toString());
                     lstResult.add(com);
                 }
             return lstResult;

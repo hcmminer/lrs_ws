@@ -38,4 +38,8 @@ public class CommuneDTO {
     private String createBy;
     private LocalDateTime updateDatetime;
     private String updateBy;
+    private String proCode;
+    private String districtCode;
+    private String proName;
+    private String districtName;
 }

@@ -1,6 +1,6 @@
 package com.viettel.base.cms.repo;
 
-import com.viettel.base.cms.interfaces.IUnit;
+import com.viettel.base.cms.interfaces.*;
 import com.viettel.base.cms.model.Unit;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

@@ -38,4 +38,7 @@ public interface BTSStationService {
     Long getProvinceIdByCode(String provinceCode) throws Exception;
 
     List<String> getListIsdnByDeptCode(String deptCode) throws Exception;
+
+    List<BTSStationDTO> searchBTSStationPNO(BTSStationDTO btsStationDTO, String lang) throws Exception;
+
 }

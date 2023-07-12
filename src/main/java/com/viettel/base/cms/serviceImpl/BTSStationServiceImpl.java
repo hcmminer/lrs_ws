@@ -2300,6 +2300,209 @@ public class BTSStationServiceImpl implements BTSStationService {
         }
     }
 
+    @Override
+    public List<BTSStationDTO> searchBTSStationPNO(BTSStationDTO btsStationDTO, String lang) throws Exception {
+        try {
+            List<BTSStationDTO> lstResult = new ArrayList<>();
+            StringBuilder sql = new StringBuilder();
+            sql.append(" SELECT "
+                    + "         brp.id,    "
+                    + "         brp.site_on_contract siteOnContract, "
+                    + "         brp.site_on_nims siteOnNims, "
+                    + "         brp.longitude, "
+                    + "         brp.latitude, "
+                    + "         brp.name, "
+                    + "         brp.address_wards address, "
+                    + "         brp.dist_id district, "
+                    + "         brp.pro_id province, "
+                    + "         brp.telephone, "
+                    + "         brp.no_of_contract contractNo, "
+                    + "         brp.period_of_rent periodOfRent, "
+                    + "         date_format(brp.start_date_contract,'%d/%m/%Y') startDateContract, "
+                    + "         date_format(brp.end_date_contract,'%d/%m/%Y') endDateContract, "
+                    + "         date_format(brp.sign_date_contract,'%d/%m/%Y') signDateContract, "
+                    + "         date_format(brp.BTS_aired_date,'%d/%m/%Y') btsAiredDate, "
+                    + "         brp.rental_fee rentalFee, "
+                    + "         brp.payment_time paymentTime, "
+                    + "         brp.file_contract fileContract, "
+                    + "         brp.file_CR fileCR, "
+                    + "         brp.has_electricity hasElectricity, "
+                    + "         brp.approved_status approvedStatus, "
+                    + "         brp.status, "
+                    + "         brp.amount, "
+                    + "         date_format(brp.turn_off_date,'%d/%m/%Y') turnOffDate, "
+                    + "         brp.created_user createdUser, "
+                    + "         date_format(brp.created_date,'%d/%m/%Y') createdDate, "
+                    + "         brp.last_modified_user lastModifiedUser, "
+                    + "         date_format(brp.last_modified_date,'%d/%m/%Y') lastModifiedDate, "
+                    + "         date_format(brp.start_date_payment,'%d/%m/%Y') startDatePayment, "
+                    + "         date_format(brp.end_date_payment,'%d/%m/%Y')  endDatePayment, "
+                    + "         brp.notes ,"
+                    + "         p.pro_code, "
+                    + "         p.pro_name provinceName, "
+                    + "         pd.dist_name districtName,"
+                    + "         fi.file_name fileContractName,"
+                    + "         fi.file_path filePathContract,"
+                    + "         fi2.file_name fileCRName,"
+                    + "         fi2.file_path filePathCR,"
+                    + " (select "
+                    + "	osv2.name "
+                    + "from "
+                    + "	option_set_value osv2, "
+                    + "	option_set os "
+                    + "where "
+                    + "	os.status = 1 "
+                    + "	and osv2 .status = 1 "
+                    + "	and osv2 .option_set_id = os.option_set_id "
+                    + "	and os.option_set_code = :optionSetApproveStatus "
+                    + "	and osv2.value = brp.approved_status "
+                    + "	and osv2.`language` = :lang) approved_status_name,"
+                    + "  (select "
+                    + "	osv2.name "
+                    + "from "
+                    + "	option_set_value osv2, "
+                    + "	option_set os "
+                    + "where "
+                    + "	os.status = 1 "
+                    + "	and osv2 .status = 1 "
+                    + "	and osv2 .option_set_id = os.option_set_id "
+                    + "	and os.option_set_code = :optionSetStationStatus "
+                    + "	and osv2.value = brp.status "
+                    + "	and osv2.`language` = :lang) station_status_name"
+                    + "  FROM   bts_rent_place brp "
+                    + " left join province p on  brp.pro_id = p.pro_id "
+                    + " left join province_district pd on brp.dist_id = pd.dist_id "
+                    + " left join file_info fi on fi.file_path = brp.file_contract "
+                    + " left join file_info fi2 on fi2.file_path = brp.file_CR "
+                    + " WHERE   1=1  ");
+            if (!StringUtils.isNullOrEmpty(btsStationDTO.getProvince())) {
+                sql.append(" AND p.pro_code = :provinceCode ");
+            }
+            if (!StringUtils.isNullOrEmpty(btsStationDTO.getSiteOnNims())) {
+                sql.append(" AND brp.site_on_nims like :siteOnNims ");
+            }
+            if (!StringUtils.isStringNullOrEmpty(btsStationDTO.getName())) {
+                sql.append(" AND brp.name like :name ");
+            }
+            if (!StringUtils.isNullOrEmpty(btsStationDTO.getDistrict())) {
+                sql.append(" AND pd.dist_id = :distId  ");
+            }
+            if (!StringUtils.isStringNullOrEmpty(btsStationDTO.getHasContractFile()) && btsStationDTO.getHasContractFile() == 1) {
+                sql.append("   AND ( brp.file_contract IS NOT NULL AND brp.file_contract <> '' ) ");
+            } else if (!StringUtils.isStringNullOrEmpty(btsStationDTO.getHasContractFile()) && btsStationDTO.getHasContractFile() == 0) {
+                sql.append("   AND ( brp.file_contract IS NULL OR brp.file_contract = '' ) ");
+            }
+            if (!StringUtils.isStringNullOrEmpty(btsStationDTO.getHasCRFile()) && btsStationDTO.getHasCRFile() == 1) {
+                sql.append(" AND ( brp.file_CR IS NOT NULL AND brp.file_CR <> ''  ) ");
+            } else if (!StringUtils.isStringNullOrEmpty(btsStationDTO.getHasCRFile()) && btsStationDTO.getHasCRFile() == 0) {
+                sql.append("  AND ( brp.file_CR IS NULL OR brp.file_CR = ''  ) ");
+            }
+            if (!StringUtils.isStringNullOrEmpty(btsStationDTO.getApprovedStatus())) {
+                sql.append(" AND ( brp.approved_status = :approvedStatus ) ");
+            }
+            if (!StringUtils.isStringNullOrEmpty(btsStationDTO.getStatus())) {
+                sql.append(" AND brp.status = :status ");
+            }
+            sql.append(" ORDER BY   brp.created_date DESC ");
+            Query query = cms.createNativeQuery(sql.toString());
+            if (!StringUtils.isStringNullOrEmpty(btsStationDTO)) {
+                if (!StringUtils.isNullOrEmpty(btsStationDTO.getProvince())) {
+                    query.setParameter("provinceCode", btsStationDTO.getProvince().trim());
+                }
+                if (!StringUtils.isNullOrEmpty(btsStationDTO.getSiteOnNims())) {
+                    query.setParameter("siteOnNims", "%" + btsStationDTO.getSiteOnNims().trim() + "%");
+                }
+                if (!StringUtils.isStringNullOrEmpty(btsStationDTO.getName())) {
+                    query.setParameter("name", "%" + btsStationDTO.getName().trim() + "%");
+                }
+                if (!StringUtils.isNullOrEmpty(btsStationDTO.getDistrict())) {
+                    query.setParameter("distId", DataUtils.getLong(btsStationDTO.getDistrict()));
+                }
+                if (!StringUtils.isStringNullOrEmpty(btsStationDTO.getApprovedStatus())) {
+                    query.setParameter("approvedStatus", DataUtils.getLong(btsStationDTO.getApprovedStatus()));
+                }
+                if (!StringUtils.isStringNullOrEmpty(btsStationDTO.getStatus())) {
+                    query.setParameter("status", DataUtils.getLong(btsStationDTO.getStatus()));
+                }
+                query.setParameter("optionSetApproveStatus", Constant.CMS_OPTION_SET.APPROVED_STATUS);
+                query.setParameter("optionSetStationStatus", Constant.CMS_OPTION_SET.STATION_STATUS);
+                query.setParameter("lang", lang);
+            }
+
+            List<Object[]> lst = query.getResultList();
+            if (!lst.isEmpty() && lst != null) {
+                for (Object[] obj : lst) {
+                    int i = 0;
+                    BTSStationDTO btsStationDTO1 = new BTSStationDTO();
+                    btsStationDTO1.setId(DataUtils.getLong(obj[0]));
+                    btsStationDTO1.setSiteOnContract(DataUtils.getString(obj[1]));
+                    btsStationDTO1.setSiteOnNims(DataUtils.getString(obj[2]));
+                    btsStationDTO1.setLongitude(DataUtils.getString(obj[3]));
+                    btsStationDTO1.setLatitude(DataUtils.getString(obj[4]));
+                    btsStationDTO1.setName(DataUtils.getString(obj[5]));
+                    btsStationDTO1.setAddress(DataUtils.getString(obj[6]));
+                    btsStationDTO1.setDistrict(DataUtils.getString(obj[7]));
+                    btsStationDTO1.setProvince(DataUtils.getString(obj[8]));
+                    btsStationDTO1.setTelephone(DataUtils.getString(obj[9]));
+                    btsStationDTO1.setContractNo(DataUtils.getString(obj[10]));
+                    btsStationDTO1.setPeriodOfRent(DataUtils.getLong(obj[11]));
+                    btsStationDTO1.setStartDateContract(DataUtils.getString(obj[12]));
+                    btsStationDTO1.setEndDateContract(DataUtils.getString(obj[13]));
+                    btsStationDTO1.setSignDateContract(DataUtils.getString(obj[14]));
+                    btsStationDTO1.setBtsAiredDate(DataUtils.getString(obj[15]));
+                    btsStationDTO1.setRentalFee(DataUtils.getLong(obj[16]));
+                    btsStationDTO1.setPaymentTime(DataUtils.getString(obj[17]));
+//                    if (!StringUtils.isStringNullOrEmpty(DataUtils.getString(obj[18]))) {
+//                        String s = Base64.getEncoder().encodeToString(DataUtils.getBytes(obj[18]));
+//                        btsStationDTO1.setFileContractBase64(s);
+//                    }
+                    if (!StringUtils.isStringNullOrEmpty(DataUtils.getBytes(obj[18]))) {
+//                        byte[] testContract = Base64.getDecoder().decode(DataUtils.getBytes(obj[18]));
+                        btsStationDTO1.setFileContract(DataUtils.getString(obj[18]));
+                    } else {
+                        btsStationDTO1.setFileContract(null);
+
+                    }
+//                    btsStationDTO1.setFileContract(DataUtils.getBytes(obj[18]));
+                    if (!StringUtils.isStringNullOrEmpty(DataUtils.getBytes(obj[19]))) {
+//                        byte[] test = Base64.getDecoder().decode(DataUtils.getBytes(obj[19]));
+                        btsStationDTO1.setFileCR(DataUtils.getString(obj[19]));
+                    } else {
+                        btsStationDTO1.setFileCR(null);
+                    }
+                    btsStationDTO1.setHasElectricity(DataUtils.getLong(obj[20]));
+                    btsStationDTO1.setApprovedStatus(DataUtils.getLong(obj[21]));
+                    btsStationDTO1.setStatus(DataUtils.getLong(obj[22]));
+                    btsStationDTO1.setAmount(DataUtils.getLong(obj[23]));
+                    btsStationDTO1.setTurnOffDate(DataUtils.getString(obj[24]));
+                    btsStationDTO1.setCreatedUser(DataUtils.getString(obj[25]));
+                    btsStationDTO1.setCreatedDate(DataUtils.getString(obj[26]));
+                    btsStationDTO1.setLastModifiedUser(DataUtils.getString(obj[27]));
+                    btsStationDTO1.setLastModifiedDate(DataUtils.getString(obj[28]));
+                    btsStationDTO1.setStartDatePayment(DataUtils.getString(obj[29]));
+                    btsStationDTO1.setEndDatePayment(DataUtils.getString(obj[30]));
+                    if (!StringUtils.isStringNullOrEmpty(DataUtils.getString(obj[31]))) {
+                        btsStationDTO1.setNotes(DataUtils.getString(obj[31]));
+                    }
+                    btsStationDTO1.setProvinceCode(DataUtils.getString(obj[32]));
+                    btsStationDTO1.setProvinceName(DataUtils.getString(obj[33]));
+                    btsStationDTO1.setDistrictName(DataUtils.getString(obj[34]));
+                    btsStationDTO1.setFileContractName(DataUtils.getString(obj[35]));
+                    btsStationDTO1.setFileContractPath(DataUtils.getString(obj[36]));
+                    btsStationDTO1.setFileCRName(DataUtils.getString(obj[37]));
+                    btsStationDTO1.setFileCRPath(DataUtils.getString(obj[38]));
+                    btsStationDTO1.setApprovedStatusName(DataUtils.getString(obj[39]));
+                    btsStationDTO1.setStatusName(DataUtils.getString(obj[40]));
+                    lstResult.add(btsStationDTO1);
+                }
+            }
+            return lstResult;
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
     private Long getConstructionTypeByName(String constructionTypeName) {
         try {
             String sql = " select * from construction_type where status = 1 and construction_type_name = :constructionTypeName ";

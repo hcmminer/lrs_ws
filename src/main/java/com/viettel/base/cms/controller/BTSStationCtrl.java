@@ -95,12 +95,16 @@ public class BTSStationCtrl {
         try {
             commonInputDTO.setAppCode("IMT");
             String roleCode = userService.getUserRole(commonInputDTO);
-            if (Constant.BTS_ROLES.CMS_BTS_CN_STAFF.equals(roleCode)) {
+            if (Constant.BTS_ROLES.CMS_BTS_TCCN_STAFF.equals(roleCode)) {
                 String provinceCode = btsStationService.getProvinceCodeOfStaff(userName);
                 commonInputDTO.getBtsStationDTO().setProvinceCode(provinceCode);
                 List<BTSStationDTO> btsStationDTOS = btsStationService.searchBTSStation(commonInputDTO.getBtsStationDTO(), language);
                 res.setData(btsStationDTOS);
-            } else {
+            } else if (Constant.BTS_ROLES.CMS_BTS_PNO_STAFF.equals(roleCode)) {
+                List<BTSStationDTO> btsStationDTOS = btsStationService.searchBTSStationPNO(commonInputDTO.getBtsStationDTO(), language);
+                res.setData(btsStationDTOS);
+            }
+            else {
                 List<BTSStationDTO> btsStationDTOS = btsStationService.searchBTSStation(commonInputDTO.getBtsStationDTO(), language);
                 res.setData(btsStationDTOS);
             }
@@ -245,11 +249,11 @@ public class BTSStationCtrl {
                     res.setDescription(r.getResourceMessage("bts.latitude.info.null"));
                     return res;
                 }
-//                if (StringUtils.isStringNullOrEmpty(commonInputDTO.getBtsStationDTO().getContractNo())) {
-//                    res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-//                    res.setDescription(r.getResourceMessage("bts.contract.no.info.null"));
-//                    return res;
-//                }
+                if (StringUtils.isStringNullOrEmpty(commonInputDTO.getBtsStationDTO().getUses())) {
+                    res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
+                    res.setDescription(r.getResourceMessage("bts.contract.no.info.null"));
+                    return res;
+                }
 //                if (StringUtils.isStringNullOrEmpty(commonInputDTO.getBtsStationDTO().getSiteOnContract())) {
 //                    res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
 //                    res.setDescription(r.getResourceMessage("bts.site.of.nims.info.null"));
@@ -304,10 +308,6 @@ public class BTSStationCtrl {
 
             }
 
-//        } else {
-//            System.out.println("authentication unsuccessful");
-//            return null;
-//        }
         } catch (Exception e) {
             e.printStackTrace();
             res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);

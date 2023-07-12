@@ -39,4 +39,6 @@ public class DistrictDTO {
     private LocalDateTime updateDatetime;
     private String updateBy;
     private Long status;
+    private String districtCode;
+    private String districtName;
 }

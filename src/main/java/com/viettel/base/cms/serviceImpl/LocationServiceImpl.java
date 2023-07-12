@@ -312,7 +312,7 @@ public class LocationServiceImpl implements LocationService {
     public List<DistrictDTO> getListDistrict(DistrictDTO districtDTO) throws Exception {
         try {
             List<DistrictDTO> lstResult = new ArrayList<>();
-            String sql = " \t SELECT    " +
+            String sql = " SELECT    " +
                     " d.district_id,   d.province_id,   d.DISTRICT_NAME    " +
                     " FROM   district d, province p  " +
                     " WHERE d.PROVINCE_ID  = p.pro_id  " +
@@ -327,7 +327,7 @@ public class LocationServiceImpl implements LocationService {
                     DistrictDTO district = new DistrictDTO();
                     district.setDistId(Long.valueOf(obj[i++].toString()));
                     district.setProId(Long.valueOf(obj[i++].toString()));
-                    district.setDistName(obj[i++].toString());
+                    district.setDistrictName(obj[i++].toString());
                     lstResult.add(district);
                 }
             return lstResult;

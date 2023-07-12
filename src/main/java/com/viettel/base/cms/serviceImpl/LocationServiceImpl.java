@@ -80,7 +80,7 @@ public class LocationServiceImpl implements LocationService {
             String sql = " SELECT   " +
                     " pro_id, pro_name , pro_code  " +
                     " FROM  province  " +
-                    " WHERE `status` = 1 " ;
+                    " WHERE `status` = 1 ";
             if (!StringUtils.isStringNullOrEmpty(provinceDTO.getProName()))
                 sql = sql + " AND LOWER(pro_name) LIKE LOWER(:provinceName) ";
             sql = sql + " LIMIT :start_row, :page_limit ";
@@ -319,7 +319,7 @@ public class LocationServiceImpl implements LocationService {
                     " AND p.pro_id  = :proId " +
                     " order by d.DISTRICT_NAME  ";
             Query query = this.cms.createNativeQuery(sql);
-            query.setParameter("proId",  districtDTO.getProId());
+            query.setParameter("proId", districtDTO.getProId());
             List<Object[]> lst = query.getResultList();
             if (!lst.isEmpty() && lst != null)
                 for (Object[] obj : lst) {
@@ -342,12 +342,12 @@ public class LocationServiceImpl implements LocationService {
         try {
             List<DistrictDTO> lstResult = new ArrayList<>();
             String sql = " SELECT   " +
-                    " p.pro_id, d.DISTRICT_ID, d.DISTRICT_NAME, p.pro_code, p.pro_name, d.DISTRICT_CODE , p.pro_code " +
+                    " p.pro_id, d.DISTRICT_ID, d.DISTRICT_NAME, p.pro_code, p.pro_name, d.DISTRICT_CODE " +
                     " FROM  province p, district d " +
                     " WHERE " +
                     " p.pro_id = d.PROVINCE_ID " +
                     " AND d.`status` = 1 " +
-                    " AND p.`status` = 1 " ;
+                    " AND p.`status` = 1 ";
             if (!StringUtils.isStringNullOrEmpty(districtDTO.getProId()))
                 sql = sql + " AND d.PROVINCE_ID = :provinceId";
             if (!StringUtils.isStringNullOrEmpty(districtDTO.getDistName()))
@@ -597,16 +597,31 @@ public class LocationServiceImpl implements LocationService {
         try {
             List<CommuneDTO> lstResult = new ArrayList<>();
             String sql = " SELECT   " +
-                    "      p.pro_id, d.DISTRICT_ID, e.CODE, e.NAME, e.ID, e.create_datetime, e.create_by, e.update_datetime, e.update_by" +
+                    "      p.pro_id, d.DISTRICT_ID, c.CODE, c.NAME, c.ID, c.create_datetime, c.create_by, c.update_datetime, c.update_by" +
                     " FROM  " +
-                    "      province p, district d, commune e" +
+                    "      province p, district d, commune c" +
                     " WHERE " +
-                    "      p.pro_id = e.PROVINCE_ID" +
-                    " AND" +
-                    "      d.DISTRICT_ID = e.DISTRICT_ID" +
+                    "      p.pro_id = c.PROVINCE_ID" +
                     " AND " +
-                    "      e.status = 1 ";
+                    "      d.DISTRICT_ID = c.DISTRICT_ID" +
+                    " AND " +
+                    "      c.PROVINCE_ID = :provinceId" +
+                    " AND " +
+                    "      c.DISTRICT_ID = :districtId";
+            if (!StringUtils.isStringNullOrEmpty(communeDTO.getCommuneName()))
+                sql = sql + " AND c.NAME = :communeName";
+            sql = sql + " AND " +
+                    "      c.status = 1 " +
+                    " ORDER BY " +
+                    "      c.NAME " +
+                    " LIMIT 500 ";
             Query query = this.cms.createNativeQuery(sql);
+            if (!StringUtils.isStringNullOrEmpty(communeDTO.getProId()))
+                query.setParameter("provinceId", communeDTO.getProId());
+            if (!StringUtils.isStringNullOrEmpty(communeDTO.getDistId()))
+                query.setParameter("districtId", communeDTO.getDistId());
+            if (!StringUtils.isStringNullOrEmpty(communeDTO.getCommuneName()))
+                query.setParameter("communeName", communeDTO.getCommuneName());
             List<Object[]> lst = query.getResultList();
             if (!lst.isEmpty() && lst != null)
                 for (Object[] obj : lst) {
@@ -649,7 +664,7 @@ public class LocationServiceImpl implements LocationService {
                     " AND " +
                     "      p.status = 1 " +
                     " AND " +
-                    "      d.status = 1 " ;
+                    "      d.status = 1 ";
             if (!StringUtils.isStringNullOrEmpty(communeDTO.getProId()))
                 sql = sql + " AND e.PROVINCE_ID = :provinceId";
             if (!StringUtils.isStringNullOrEmpty(communeDTO.getDistId()))

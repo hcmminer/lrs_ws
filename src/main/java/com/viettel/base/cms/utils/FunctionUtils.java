@@ -219,11 +219,11 @@ public class FunctionUtils {
             res.setDescription(r.getResourceMessage("bts.site.of.nims.info.null"));
             return res;
         }
-        if (StringUtils.isStringNullOrEmpty(btsStationDTO.getSiteOnContract())) {
-            res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-            res.setDescription(r.getResourceMessage("bts.contract.no.info.null"));
-            return res;
-        }
+//        if (StringUtils.isStringNullOrEmpty(btsStationDTO.getSiteOnContract())) {
+//            res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
+//            res.setDescription(r.getResourceMessage("bts.contract.no.info.null"));
+//            return res;
+//        }
         if (StringUtils.isStringNullOrEmpty(btsStationDTO.getLongitude())) {
             res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
             res.setDescription(r.getResourceMessage("bts.longitude.info.null"));

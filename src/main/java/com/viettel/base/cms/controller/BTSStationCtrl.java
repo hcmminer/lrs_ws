@@ -95,12 +95,15 @@ public class BTSStationCtrl {
         try {
             commonInputDTO.setAppCode("IMT");
             String roleCode = userService.getUserRole(commonInputDTO);
-            if (Constant.BTS_ROLES.CMS_BTS_CN_STAFF.equals(roleCode)) {
+            if (Constant.BTS_ROLES.CMS_BTS_TCCN_STAFF.equals(roleCode)) {
                 String provinceCode = btsStationService.getProvinceCodeOfStaff(userName);
-                commonInputDTO.getBtsStationDTO().setProvinceCode(provinceCode);
                 List<BTSStationDTO> btsStationDTOS = btsStationService.searchBTSStation(commonInputDTO.getBtsStationDTO(), language);
                 res.setData(btsStationDTOS);
-            } else {
+            } else if (Constant.BTS_ROLES.CMS_BTS_PNO_STAFF.equals(roleCode)) {
+                List<BTSStationDTO> btsStationDTOS = btsStationService.searchBTSStationPNO(commonInputDTO.getBtsStationDTO(), language);
+                res.setData(btsStationDTOS);
+            }
+            else {
                 List<BTSStationDTO> btsStationDTOS = btsStationService.searchBTSStation(commonInputDTO.getBtsStationDTO(), language);
                 res.setData(btsStationDTOS);
             }
@@ -189,8 +192,8 @@ public class BTSStationCtrl {
             if (Constant.EXECUTION_ERROR.ERROR.equals(tempRes.getErrorCode())) {
                 return tempRes;
             }
-            commonInputDTO.getBtsStationDTO().setCreatedUser(commonInputDTO.getUserName().split("----")[0]);
-            commonInputDTO.getBtsStationDTO().setCreatedDate(String.valueOf(LocalDateTime.now()));
+            commonInputDTO.getBtsStationDTO().setCreateBy(commonInputDTO.getUserName().split("----")[0]);
+            commonInputDTO.getBtsStationDTO().setCreateDatetime(LocalDateTime.now());
             btsStationService.createBTSStation(commonInputDTO.getBtsStationDTO(), staff);
             res.setDescription(r.getResourceMessage("add.bts.station.success"));
             return res;
@@ -245,11 +248,11 @@ public class BTSStationCtrl {
                     res.setDescription(r.getResourceMessage("bts.latitude.info.null"));
                     return res;
                 }
-//                if (StringUtils.isStringNullOrEmpty(commonInputDTO.getBtsStationDTO().getContractNo())) {
-//                    res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-//                    res.setDescription(r.getResourceMessage("bts.contract.no.info.null"));
-//                    return res;
-//                }
+                if (StringUtils.isStringNullOrEmpty(commonInputDTO.getBtsStationDTO().getUses())) {
+                    res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
+                    res.setDescription(r.getResourceMessage("bts.contract.no.info.null"));
+                    return res;
+                }
 //                if (StringUtils.isStringNullOrEmpty(commonInputDTO.getBtsStationDTO().getSiteOnContract())) {
 //                    res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
 //                    res.setDescription(r.getResourceMessage("bts.site.of.nims.info.null"));
@@ -304,10 +307,6 @@ public class BTSStationCtrl {
 
             }
 
-//        } else {
-//            System.out.println("authentication unsuccessful");
-//            return null;
-//        }
         } catch (Exception e) {
             e.printStackTrace();
             res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
@@ -316,734 +315,6 @@ public class BTSStationCtrl {
         return res;
     }
 
-    ExecutionResult validateInputUpdate(CommonInputDTO commonInputDTO, BTSStationDTO btsStationDTO, String language) {
-        ExecutionResult res = new ExecutionResult();
-        ResourceBundle r = new ResourceBundle(language);
-        res.setErrorCode(Constant.EXECUTION_ERROR.SUCCESS);
-        VSAValidate vsaValidate = new VSAValidate();
-        UserToken userToken = vsaValidate.getUserToken();
-        DateValidator validator = new DataUtil.DateValidatorUsingDateFormat("dd/MM/yyyy");
-//        if (userToken != null) {
-        try {
-            commonInputDTO.setAppCode("IMT");
-            String roleCode = userService.getUserRole(commonInputDTO);
-//            String roleCode = Constant.BTS_ROLES.CMS_BTS_TCCN_STAFF;
-            List<BTSStation> btsStationList = btsStationService.getListBTSStationById(btsStationDTO);
-            if (btsStationList.size() <= 0) {
-                res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-                res.setDescription(r.getResourceMessage("bts.station.code.already.not.exist.update", btsStationDTO.getId() + "-" + btsStationDTO.getSiteOnNims()));
-                return res;
-            }
-            String status = btsStationService.getStatusBTSStation(btsStationDTO);
-            String approvedStatus = btsStationService.getApprovedStatusBTSStation(btsStationDTO);
-            if (Constant.STATUS_VALUE.WORKING.equals(status)) {
-                if (Constant.APPROVED_VALUE.APPROVE.equals(approvedStatus)) {
-                    if (!(Constant.BTS_ROLES.CMS_BTS_GRAND_TC_STAFF.equals(roleCode) || Constant.BTS_ROLES.CMS_BTS_TCCN_STAFF.equals(roleCode))) {
-                    res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-                    res.setDescription(r.getResourceMessage("bts.station.status.not.allow.update.null", btsStationDTO.getId() + "-" + btsStationDTO.getSiteOnNims()));
-                        return res;
-                    }
-                } else {
-                    res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-                    res.setDescription(r.getResourceMessage("bts.station.status.not.allow.update.null", btsStationDTO.getId() + "-" + btsStationDTO.getSiteOnNims()));
-                    return res;
-                }
-//                else if (Constant.APPROVED_VALUE.REJECT.equals(approvedStatus)){
-//                    res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-//                    res.setDescription(r.getResourceMessage("bts.station.status.not.allow.update.null", btsStationDTO.getId() + "-" + btsStationDTO.getSiteOnNims()));
-//                    return res;
-//                }
-//                else{
-//                    res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-//                res.setDescription(r.getResourceMessage("bts.station.status.not.allow.update.null", btsStationDTO.getId() + "-" + btsStationDTO.getSiteOnNims()));
-//            }
-//                return res;
-            } else {
-                if (Constant.APPROVED_VALUE.APPROVE.equals(approvedStatus)) {
-                        res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-                        res.setDescription(r.getResourceMessage("bts.station.status.not.allow.update.null", btsStationDTO.getId() + "-" + btsStationDTO.getSiteOnNims()));
-                        return res;
-                }
-            }
-
-
-
-//            if (!StringUtils.isStringNullOrEmpty(userToken.getRolesList())){
-//                for (RoleToken roleToken: userToken.getRolesList()){
-            if (Constant.BTS_ROLES.CMS_BTS_PNO_STAFF.equals(roleCode)) {
-                if (StringUtils.isStringNullOrEmpty(btsStationDTO.getSiteOnNims())) {
-                    res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-                    res.setDescription(r.getResourceMessage("bts.site.of.nims.info.null"));
-                    return res;
-                }
-                if (StringUtils.isStringNullOrEmpty(btsStationDTO.getLongitude())) {
-                    res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-                    res.setDescription(r.getResourceMessage("bts.longitude.info.null"));
-                    return res;
-                }
-
-                if (StringUtils.isStringNullOrEmpty(btsStationDTO.getLatitude())) {
-                    res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-                    res.setDescription(r.getResourceMessage("bts.latitude.info.null"));
-                    return res;
-                }
-                boolean checkLat = new DataUtil.UsernameValidator().validateNumberDouble(btsStationDTO.getLatitude());
-                if (!checkLat){
-                    res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-                    res.setDescription(r.getResourceMessage("bts.station.lat.long.not.allow.format"));
-                    return res;
-                }
-                boolean checkLong = new DataUtil.UsernameValidator().validateNumberDouble(btsStationDTO.getLongitude());
-                if (!checkLong){
-                    res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-                    res.setDescription(r.getResourceMessage("bts.station.lat.long.not.allow.format"));
-                    return res;
-                }
-//                if (StringUtils.isStringNullOrEmpty(btsStationDTO.getContractNo())) {
-//                    res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-//                    res.setDescription(r.getResourceMessage("bts.contract.no.info.null"));
-//                    return res;
-//                }
-            } else if (Constant.BTS_ROLES.CMS_BTS_TCCN_STAFF.equals(roleCode)){
-//                if (StringUtils.isStringNullOrEmpty(btsStationDTO.getSiteOnNims())) {
-//                    res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-//                    res.setDescription(r.getResourceMessage("bts.site.of.nims.info.null"));
-//                    return res;
-//                }
-//                if (StringUtils.isStringNullOrEmpty(btsStationDTO.getLongitude())) {
-//                    res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-//                    res.setDescription(r.getResourceMessage("bts.longitude.info.null"));
-//                    return res;
-//                }
-//
-//                if (StringUtils.isStringNullOrEmpty(btsStationDTO.getLatitude())) {
-//                    res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-//                    res.setDescription(r.getResourceMessage("bts.latitude.info.null"));
-//                    return res;
-//                }
-//
-//                boolean checkLat = new DataUtil.UsernameValidator().validateNumberDouble(btsStationDTO.getLatitude());
-//                if (!checkLat){
-//                    res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-//                    res.setDescription(r.getResourceMessage("bts.station.lat.long.not.allow.format"));
-//                    return res;
-//                }
-//                boolean checkLong = new DataUtil.UsernameValidator().validateNumberDouble(btsStationDTO.getLongitude());
-//                if (!checkLong){
-//                    res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-//                    res.setDescription(r.getResourceMessage("bts.station.lat.long.not.allow.format"));
-//                    return res;
-//                }
-                if (StringUtils.isStringNullOrEmpty(btsStationDTO.getContractNo())) {
-                    res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-                    res.setDescription(r.getResourceMessage("bts.contract.no.info.null"));
-                    return res;
-                }
-                if (StringUtils.isStringNullOrEmpty(btsStationDTO.getName())) {
-                res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-                res.setDescription(r.getResourceMessage("bts.name.info.null"));
-                return res;
-                }
-                if (StringUtils.isStringNullOrEmpty(btsStationDTO.getProvince())) {
-                res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-                res.setDescription(r.getResourceMessage("bts.provice.info.null"));
-                return res;
-                }
-                if (StringUtils.isStringNullOrEmpty(btsStationDTO.getDistrict())) {
-                res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-                res.setDescription(r.getResourceMessage("bts.district.info.null"));
-                return res;
-                }
-                if (StringUtils.isStringNullOrEmpty(btsStationDTO.getTelephone())) {
-                res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-                res.setDescription(r.getResourceMessage("bts.telephone.info.null"));
-                return res;
-                } else {
-                    boolean checkFormat = new DataUtil.PhoneValidator().validateNumber(btsStationDTO.getTelephone());
-                        if (!checkFormat){
-                            res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-                            res.setDescription(r.getResourceMessage("bts.station.telephone.not.allow.format"));
-                            return res;
-                        }
-
-                }
-                if (StringUtils.isStringNullOrEmpty(btsStationDTO.getStartDatePayment())) {
-                res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-                res.setDescription(r.getResourceMessage("bts.started.date.payment.info.null"));
-                return res;
-                } else {
-                    if (!validator.isValid(btsStationDTO.getStartDatePayment())) {
-                        res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-                        res.setDescription(r.getResourceMessage("bts.date.not.format"));
-                        return res;
-                    }
-                }
-                if (StringUtils.isStringNullOrEmpty(btsStationDTO.getEndDatePayment())) {
-                res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-                res.setDescription(r.getResourceMessage("bts.end.date.payment.info.null"));
-                return res;
-                 }else {
-                    if (!validator.isValid(btsStationDTO.getEndDatePayment())) {
-                        res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-                        res.setDescription(r.getResourceMessage("bts.date.not.format"));
-                        return res;
-                    }
-                }
-
-                if (!StringUtils.isStringNullOrEmpty(btsStationDTO.getStartDatePayment()) && !StringUtils.isStringNullOrEmpty(btsStationDTO.getEndDatePayment())) {
-                    if (DataUtil.compareDate(btsStationDTO.getStartDatePayment(), btsStationDTO.getEndDatePayment(), "dd/MM/yyyy")){
-                        res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-                        res.setDescription(r.getResourceMessage("bts.from.date.not.before.to.date.payment"));
-                        return res;
-                    }
-
-                }
-                if (StringUtils.isStringNullOrEmpty(btsStationDTO.getAmount())) {
-                    res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-                    res.setDescription(r.getResourceMessage("bts.amount.info.null"));
-                    return res;
-                }else {
-                    boolean checkFormat = new DataUtil.NumberValidator().validateNumber(String.valueOf(btsStationDTO.getAmount()));
-                    if (!checkFormat){
-                        res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-                        res.setDescription(r.getResourceMessage("bts.station.amount.not.allow.format"));
-                        return res;
-                    }
-
-                }
-                if (StringUtils.isStringNullOrEmpty(btsStationDTO.getPaymentTime())) {
-                    res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-                    res.setDescription(r.getResourceMessage("bts.payment.time.info.null"));
-                    return res;
-                }else {
-                    boolean checkFormat = new DataUtil.NumberValidator().validateNumber(btsStationDTO.getPaymentTime());
-                    if (!checkFormat){
-                        res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-                        res.setDescription(r.getResourceMessage("bts.station.payment.time.not.allow.format"));
-                        return res;
-                    }
-
-                }
-                if (StringUtils.isStringNullOrEmpty(btsStationDTO.getHasElectricity())) {
-                    res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-                    res.setDescription(r.getResourceMessage("bts.has.electricity.info.null"));
-                    return res;
-                }
-                if (StringUtils.isStringNullOrEmpty(btsStationDTO.getFileContract())) {
-                    res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-                    res.setDescription(r.getResourceMessage("bts.file.contract.info.null"));
-                    return res;
-                }
-                if (StringUtils.isStringNullOrEmpty(btsStationDTO.getPeriodOfRent())) {
-                    res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-                    res.setDescription(r.getResourceMessage("bts.period.of.rent.info.null"));
-                    return res;
-                }else {
-                    boolean checkFormat = new DataUtil.NumberValidator().validateNumber(String.valueOf(btsStationDTO.getPeriodOfRent()));
-                    if (!checkFormat){
-                        res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-                        res.setDescription(r.getResourceMessage("bts.station.period.of.rent.not.allow.format"));
-                        return res;
-                    }
-
-                }
-                if (StringUtils.isStringNullOrEmpty(btsStationDTO.getStartDateContract())) {
-                    res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-                    res.setDescription(r.getResourceMessage("bts.started.date.contract.info.null"));
-                    return res;
-                }else {
-                    if (!validator.isValid(btsStationDTO.getStartDateContract())) {
-                        res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-                        res.setDescription(r.getResourceMessage("bts.date.not.format"));
-                        return res;
-                    }
-                }
-//                if (StringUtils.isStringNullOrEmpty(btsStationDTO.getEndDateContract())) {
-//                    res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-//                    res.setDescription(r.getResourceMessage("bts.end.date.contract.info.null"));
-//                    return res;
-//                }else {
-//                    if (!validator.isValid(btsStationDTO.getEndDateContract())) {
-//                        res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-//                        res.setDescription(r.getResourceMessage("bts.date.not.format"));
-//                        return res;
-//                    }
-//                }
-                if (!StringUtils.isStringNullOrEmpty(btsStationDTO.getStartDateContract()) && !StringUtils.isStringNullOrEmpty(btsStationDTO.getEndDateContract())) {
-                    if (DataUtil.compareDate(btsStationDTO.getStartDateContract(), btsStationDTO.getStartDateContract(), "dd/MM/yyyy")){
-                        res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-                        res.setDescription(r.getResourceMessage("bts.from.date.not.before.to.date.payment"));
-                        return res;
-                    }
-
-                }
-                if (StringUtils.isStringNullOrEmpty(btsStationDTO.getSignDateContract())) {
-                    res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-                    res.setDescription(r.getResourceMessage("bts.sign.date.contract.info.null"));
-                    return res;
-                }else {
-                    if (!validator.isValid(btsStationDTO.getSignDateContract())) {
-                        res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-                        res.setDescription(r.getResourceMessage("bts.date.not.format"));
-                        return res;
-                    }
-                }
-                if (StringUtils.isStringNullOrEmpty(btsStationDTO.getRentalFee())) {
-                    res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-                    res.setDescription(r.getResourceMessage("bts.rental.fee.info.null"));
-                    return res;
-                }else {
-                    boolean checkFormat = new DataUtil.NumberValidator().validateNumber(String.valueOf(btsStationDTO.getRentalFee()));
-                    if (!checkFormat){
-                        res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-                        res.setDescription(r.getResourceMessage("bts.station.rental.fee.not.allow.format"));
-                        return res;
-                    }
-
-                }
-
-//            }
-//            else if (Constant.BTS_ROLES.CMS_BTS_CN_STAFF.equals(roleCode)){
-//                if (StringUtils.isStringNullOrEmpty(btsStationDTO.getSiteOnNims())) {
-//                    res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-//                    res.setDescription(r.getResourceMessage("bts.site.of.nims.info.null"));
-//                    return res;
-//                }
-                if (StringUtils.isStringNullOrEmpty(btsStationDTO.getLongitude())) {
-                    res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-                    res.setDescription(r.getResourceMessage("bts.longitude.info.null"));
-                    return res;
-                }
-
-                if (StringUtils.isStringNullOrEmpty(btsStationDTO.getLatitude())) {
-                    res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-                    res.setDescription(r.getResourceMessage("bts.latitude.info.null"));
-                    return res;
-                }
-                boolean checkLat = new DataUtil.UsernameValidator().validateNumberDouble(btsStationDTO.getLatitude());
-                if (!checkLat){
-                    res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-                    res.setDescription(r.getResourceMessage("bts.station.lat.long.not.allow.format"));
-                    return res;
-                }
-                boolean checkLong = new DataUtil.UsernameValidator().validateNumberDouble(btsStationDTO.getLongitude());
-                if (!checkLong){
-                    res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-                    res.setDescription(r.getResourceMessage("bts.station.lat.long.not.allow.format"));
-                    return res;
-                }
-//                if (StringUtils.isStringNullOrEmpty(btsStationDTO.getContractNo())) {
-//                    res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-//                    res.setDescription(r.getResourceMessage("bts.contract.no.info.null"));
-//                }
-//                    if (StringUtils.isStringNullOrEmpty(btsStationDTO.getName())) {
-//                    res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-//                    res.setDescription(r.getResourceMessage("bts.name.info.null"));
-//                    return res;
-//                }
-//                if (StringUtils.isStringNullOrEmpty(btsStationDTO.getProvince())) {
-//                    res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-//                    res.setDescription(r.getResourceMessage("bts.provice.info.null"));
-//                    return res;
-//                }
-//                if (StringUtils.isStringNullOrEmpty(btsStationDTO.getDistrict())) {
-//                    res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-//                    res.setDescription(r.getResourceMessage("bts.district.info.null"));
-//                    return res;
-//                }
-//                if (StringUtils.isStringNullOrEmpty(btsStationDTO.getTelephone())) {
-//                    res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-//                    res.setDescription(r.getResourceMessage("bts.telephone.info.null"));
-//                    return res;
-//                }else {
-//                    boolean checkFormat = new DataUtil.NumberValidator().validateNumber(btsStationDTO.getTelephone());
-//                    if (!checkFormat){
-//                        res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-//                        res.setDescription(r.getResourceMessage("bts.station.telephone.not.allow.format"));
-//                        return res;
-//                    }
-//
-//                }
-//                if (StringUtils.isStringNullOrEmpty(btsStationDTO.getStartDatePayment())) {
-//                    res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-//                    res.setDescription(r.getResourceMessage("bts.started.date.payment.info.null"));
-//                    return res;
-//                }else {
-//                    if (!validator.isValid(btsStationDTO.getStartDatePayment())) {
-//                        res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-//                        res.setDescription(r.getResourceMessage("bts.date.not.format"));
-//                        return res;
-//                    }
-//                }
-//                if (StringUtils.isStringNullOrEmpty(btsStationDTO.getEndDatePayment())) {
-//                    res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-//                    res.setDescription(r.getResourceMessage("bts.end.date.payment.info.null"));
-//                    return res;
-//                }else {
-//                    if (!validator.isValid(btsStationDTO.getEndDatePayment())) {
-//                        res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-//                        res.setDescription(r.getResourceMessage("bts.date.not.format"));
-//                        return res;
-//                    }
-//                }
-//                if (!StringUtils.isStringNullOrEmpty(btsStationDTO.getStartDatePayment()) && !StringUtils.isStringNullOrEmpty(btsStationDTO.getEndDatePayment())) {
-//                    if (DataUtil.compareDate(btsStationDTO.getStartDatePayment(), btsStationDTO.getEndDatePayment(), "dd/MM/yyyy")){
-//                        res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-//                        res.setDescription(r.getResourceMessage("bts.from.date.not.before.to.date.payment"));
-//                        return res;
-//                    }
-//                }
-//                if (StringUtils.isStringNullOrEmpty(btsStationDTO.getAmount())) {
-//                    res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-//                    res.setDescription(r.getResourceMessage("bts.amount.info.null"));
-//                    return res;
-//                }else {
-//                    boolean checkFormat = new DataUtil.NumberValidator().validateNumber(String.valueOf(btsStationDTO.getAmount()));
-//                    if (!checkFormat){
-//                        res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-//                        res.setDescription(r.getResourceMessage("bts.station.amount.not.allow.format"));
-//                        return res;
-//                    }
-//
-//                }
-//                if (StringUtils.isStringNullOrEmpty(btsStationDTO.getPaymentTime())) {
-//                    res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-//                    res.setDescription(r.getResourceMessage("bts.payment.time.info.null"));
-//                    return res;
-//                }else {
-//                    boolean checkFormat = new DataUtil.NumberValidator().validateNumber(btsStationDTO.getPaymentTime());
-//                    if (!checkFormat){
-//                        res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-//                        res.setDescription(r.getResourceMessage("bts.station.payment.time.not.allow.format"));
-//                        return res;
-//                    }
-//
-//                }
-//                if (StringUtils.isStringNullOrEmpty(btsStationDTO.getHasElectricity())) {
-//                    res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-//                    res.setDescription(r.getResourceMessage("bts.has.electricity.info.null"));
-//                    return res;
-//                }
-//                if (StringUtils.isStringNullOrEmpty(btsStationDTO.getFileContract())) {
-//                    res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-//                    res.setDescription(r.getResourceMessage("bts.file.contract.info.null"));
-//                    return res;
-//                }
-//
-            }else if (Constant.BTS_ROLES.CMS_BTS_GRAND_TC_STAFF.equals(roleCode)){
-//                if (StringUtils.isStringNullOrEmpty(btsStationDTO.getSiteOnNims())) {
-//                    res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-//                    res.setDescription(r.getResourceMessage("bts.site.of.nims.info.null"));
-//                    return res;
-//                }
-//                if (StringUtils.isStringNullOrEmpty(btsStationDTO.getLongitude())) {
-//                    res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-//                    res.setDescription(r.getResourceMessage("bts.longitude.info.null"));
-//                    return res;
-//                }
-//
-//                if (StringUtils.isStringNullOrEmpty(btsStationDTO.getLatitude())) {
-//                    res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-//                    res.setDescription(r.getResourceMessage("bts.latitude.info.null"));
-//                    return res;
-//                }
-//                boolean checkLat = new DataUtil.UsernameValidator().validateNumberDouble(btsStationDTO.getLatitude());
-//                if (!checkLat){
-//                    res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-//                    res.setDescription(r.getResourceMessage("bts.station.lat.long.not.allow.format"));
-//                    return res;
-//                }
-//                boolean checkLong = new DataUtil.UsernameValidator().validateNumberDouble(btsStationDTO.getLongitude());
-//                if (!checkLong){
-//                    res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-//                    res.setDescription(r.getResourceMessage("bts.station.lat.long.not.allow.format"));
-//                    return res;
-//                }
-                if (StringUtils.isStringNullOrEmpty(btsStationDTO.getContractNo())) {
-                    res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-                    res.setDescription(r.getResourceMessage("bts.contract.no.info.null"));
-                    return res;
-                }
-                if (StringUtils.isStringNullOrEmpty(btsStationDTO.getName())) {
-                    res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-                    res.setDescription(r.getResourceMessage("bts.name.info.null"));
-                    return res;
-                }
-                if (StringUtils.isStringNullOrEmpty(btsStationDTO.getProvince())) {
-                    res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-                    res.setDescription(r.getResourceMessage("bts.provice.info.null"));
-                    return res;
-                }
-                if (StringUtils.isStringNullOrEmpty(btsStationDTO.getDistrict())) {
-                    res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-                    res.setDescription(r.getResourceMessage("bts.district.info.null"));
-                    return res;
-                }
-                if (StringUtils.isStringNullOrEmpty(btsStationDTO.getTelephone())) {
-                    res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-                    res.setDescription(r.getResourceMessage("bts.telephone.info.null"));
-                    return res;
-                }else {
-                    boolean checkFormat = new DataUtil.NumberValidator().validateNumber(btsStationDTO.getTelephone());
-                    if (!checkFormat){
-                        res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-                        res.setDescription(r.getResourceMessage("bts.station.telephone.not.allow.format"));
-                        return res;
-                    }
-
-                }
-                if (StringUtils.isStringNullOrEmpty(btsStationDTO.getStartDatePayment())) {
-                    res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-                    res.setDescription(r.getResourceMessage("bts.started.date.payment.info.null"));
-                    return res;
-                }else {
-                    if (!validator.isValid(btsStationDTO.getStartDatePayment())) {
-                        res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-                        res.setDescription(r.getResourceMessage("bts.date.not.format"));
-                        return res;
-                    }
-                }
-//                if (StringUtils.isStringNullOrEmpty(btsStationDTO.getEndDatePayment())) {
-//                    res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-//                    res.setDescription(r.getResourceMessage("bts.end.date.payment.info.null"));
-//                    return res;
-//                }else {
-//                    if (!validator.isValid(btsStationDTO.getEndDatePayment())) {
-//                        res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-//                        res.setDescription(r.getResourceMessage("bts.date.not.format"));
-//                        return res;
-//                    }
-//                }
-                if (!StringUtils.isStringNullOrEmpty(btsStationDTO.getStartDatePayment()) && !StringUtils.isStringNullOrEmpty(btsStationDTO.getEndDatePayment())) {
-                    if (DataUtil.compareDate(btsStationDTO.getStartDatePayment(), btsStationDTO.getEndDatePayment(), "dd/MM/yyyy")){
-                        res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-                        res.setDescription(r.getResourceMessage("bts.from.date.not.before.to.date.payment"));
-                        return res;
-                    }
-
-                }
-                if (StringUtils.isStringNullOrEmpty(btsStationDTO.getAmount())) {
-                    res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-                    res.setDescription(r.getResourceMessage("bts.amount.info.null"));
-                    return res;
-                }else {
-                    boolean checkFormat = new DataUtil.NumberValidator().validateNumber(String.valueOf(btsStationDTO.getAmount()));
-                    if (!checkFormat){
-                        res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-                        res.setDescription(r.getResourceMessage("bts.station.amount.not.allow.format"));
-                        return res;
-                    }
-
-                }
-                if (StringUtils.isStringNullOrEmpty(btsStationDTO.getPaymentTime())) {
-                    res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-                    res.setDescription(r.getResourceMessage("bts.payment.time.info.null"));
-                    return res;
-                }else {
-                    boolean checkFormat = new DataUtil.NumberValidator().validateNumber(btsStationDTO.getPaymentTime());
-                    if (!checkFormat){
-                        res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-                        res.setDescription(r.getResourceMessage("bts.station.payment.time.not.allow.format"));
-                        return res;
-                    }
-
-                }
-                if (StringUtils.isStringNullOrEmpty(btsStationDTO.getHasElectricity())) {
-                    res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-                    res.setDescription(r.getResourceMessage("bts.has.electricity.info.null"));
-                    return res;
-                }
-                if (StringUtils.isStringNullOrEmpty(btsStationDTO.getFileContract())) {
-                    res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-                    res.setDescription(r.getResourceMessage("bts.file.contract.info.null"));
-                    return res;
-                }
-                if (StringUtils.isStringNullOrEmpty(btsStationDTO.getPeriodOfRent())) {
-                    res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-                    res.setDescription(r.getResourceMessage("bts.period.of.rent.info.null"));
-                    return res;
-                }else {
-                    boolean checkFormat = new DataUtil.NumberValidator().validateNumber(String.valueOf(btsStationDTO.getPeriodOfRent()));
-                    if (!checkFormat){
-                        res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-                        res.setDescription(r.getResourceMessage("bts.station.period.of.rent.not.allow.format"));
-                        return res;
-                    }
-
-                }
-                if (StringUtils.isStringNullOrEmpty(btsStationDTO.getStartDateContract())) {
-                    res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-                    res.setDescription(r.getResourceMessage("bts.started.date.contract.info.null"));
-                    return res;
-                }else {
-                    if (!validator.isValid(btsStationDTO.getStartDateContract())) {
-                        res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-                        res.setDescription(r.getResourceMessage("bts.date.not.format"));
-                        return res;
-                    }
-                }
-                if (StringUtils.isStringNullOrEmpty(btsStationDTO.getEndDateContract())) {
-                    res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-                    res.setDescription(r.getResourceMessage("bts.end.date.contract.info.null"));
-                    return res;
-                }else {
-                    if (!validator.isValid(btsStationDTO.getEndDateContract())) {
-                        res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-                        res.setDescription(r.getResourceMessage("bts.date.not.format"));
-                        return res;
-                    }
-                }
-                if (!StringUtils.isStringNullOrEmpty(btsStationDTO.getStartDateContract()) && !StringUtils.isStringNullOrEmpty(btsStationDTO.getEndDateContract())) {
-                    if (DataUtil.compareDate(btsStationDTO.getStartDateContract(), btsStationDTO.getStartDateContract(), "dd/MM/yyyy")){
-                        res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-                        res.setDescription(r.getResourceMessage("bts.from.date.not.before.to.date.payment"));
-                        return res;
-                    }
-
-                }
-                if (StringUtils.isStringNullOrEmpty(btsStationDTO.getSignDateContract())) {
-                    res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-                    res.setDescription(r.getResourceMessage("bts.sign.date.contract.info.null"));
-                    return res;
-                }else {
-                    if (!validator.isValid(btsStationDTO.getSignDateContract())) {
-                        res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-                        res.setDescription(r.getResourceMessage("bts.date.not.format"));
-                        return res;
-                    }
-                }
-                if (StringUtils.isStringNullOrEmpty(btsStationDTO.getRentalFee())) {
-                    res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-                    res.setDescription(r.getResourceMessage("bts.rental.fee.info.null"));
-                    return res;
-                }else {
-                    boolean checkFormat = new DataUtil.NumberValidator().validateNumber(String.valueOf(btsStationDTO.getRentalFee()));
-                    if (!checkFormat){
-                        res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-                        res.setDescription(r.getResourceMessage("bts.station.rental.fee.not.allow.format"));
-                        return res;
-                    }
-
-                }
-
-            }else if (Constant.BTS_ROLES.CMS_BTS_CND_STAFF.equals(roleCode)){
-                if (StringUtils.isStringNullOrEmpty(btsStationDTO.getApprovedStatus())) {
-                    res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-                    res.setDescription(r.getResourceMessage("bts.approved.status.info.null"));
-                    return res;
-                }
-
-            }
-
-            if (!StringUtils.isStringNullOrEmpty(btsStationDTO.getProvinceCode())) {
-                Long provinceId = btsStationService.getProvinceIdByCode(btsStationDTO.getProvinceCode());
-                btsStationDTO.setProvince(String.valueOf(provinceId));
-            }
-
-//                }
-//            }
-//            if (StringUtils.isStringNullOrEmpty(commonInputDTO.getBtsStationDTO().getSiteOnNims())) {
-//                res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-//                res.setDescription(r.getResourceMessage("bts.site.of.nims.info.null"));
-//                return res;
-//            } else {
-//                String responseSMS = checkSiteOnNims(commonInputDTO.getBtsStationDTO().getSiteOnNims());
-//                boolean checkReturn = responseSMS.contains("<status>0</status>");
-//                if (checkReturn) {
-//                    res.setErrorCode(Constant.EXECUTION_ERROR.SUCCESS);
-//                } else {
-//                    res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-//                    res.setDescription(r.getResourceMessage("bts.site.on.nims.not.exits"));
-//                    return res;
-//                }
-//            }
-//            if (StringUtils.isStringNullOrEmpty(commonInputDTO.getBtsStationDTO().getLongitude())) {
-//                res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-//                res.setDescription(r.getResourceMessage("bts.longitude.info.null"));
-//                return res;
-//            }
-//
-//            if (StringUtils.isStringNullOrEmpty(commonInputDTO.getBtsStationDTO().getLatitude())) {
-//                res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-//                res.setDescription(r.getResourceMessage("bts.latitude.info.null"));
-//                return res;
-//            }
-//            if (StringUtils.isStringNullOrEmpty(commonInputDTO.getBtsStationDTO().getContractNo())) {
-//                res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-//                res.setDescription(r.getResourceMessage("bts.contract.no.info.null"));
-//                return res;
-//            }
-//            if (StringUtils.isStringNullOrEmpty(commonInputDTO.getBtsStationDTO().getName())) {
-//                res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-//                res.setDescription(r.getResourceMessage("bts.name.info.null"));
-//                return res;
-//            }
-//            if (StringUtils.isStringNullOrEmpty(commonInputDTO.getBtsStationDTO().getProvince())) {
-//                res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-//                res.setDescription(r.getResourceMessage("bts.provice.info.null"));
-//                return res;
-//            }
-//            if (StringUtils.isStringNullOrEmpty(commonInputDTO.getBtsStationDTO().getDistrict())) {
-//                res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-//                res.setDescription(r.getResourceMessage("bts.district.info.null"));
-//                return res;
-//            }
-//            if (StringUtils.isStringNullOrEmpty(commonInputDTO.getBtsStationDTO().getTelephone())) {
-//                res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-//                res.setDescription(r.getResourceMessage("bts.telephone.info.null"));
-//                return res;
-//            }
-//            if (StringUtils.isStringNullOrEmpty(commonInputDTO.getBtsStationDTO().getStartDateContract())) {
-//                res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-//                res.setDescription(r.getResourceMessage("bts.started.date.contract.info.null"));
-//                return res;
-//            }
-//            if (StringUtils.isStringNullOrEmpty(commonInputDTO.getBtsStationDTO().getEndDateContract())) {
-//                res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-//                res.setDescription(r.getResourceMessage("bts.end.date.contract.info.null"));
-//                return res;
-//            }
-//            if (StringUtils.isStringNullOrEmpty(commonInputDTO.getBtsStationDTO().getRentalFee())) {
-//                res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-//                res.setDescription(r.getResourceMessage("bts.rental.fee.info.null"));
-//                return res;
-//            }
-//            if (StringUtils.isStringNullOrEmpty(commonInputDTO.getBtsStationDTO().getPaymentTime())) {
-//                res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-//                res.setDescription(r.getResourceMessage("bts.payment.time.info.null"));
-//                return res;
-//            }
-//            if (StringUtils.isStringNullOrEmpty(commonInputDTO.getBtsStationDTO().getPeriodOfRent())) {
-//                res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-//                res.setDescription(r.getResourceMessage("bts.period.of.rent.info.null"));
-//                return res;
-//            }
-//            if (StringUtils.isStringNullOrEmpty(commonInputDTO.getBtsStationDTO().getFileContract())) {
-//                res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-//                res.setDescription(r.getResourceMessage("bts.file.contract.info.null"));
-//                return res;
-//            }
-//            if (StringUtils.isStringNullOrEmpty(commonInputDTO.getBtsStationDTO().getApprovedStatus())) {
-//                res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-//                res.setDescription(r.getResourceMessage("bts.approved.status.info.null"));
-//                return res;
-//            }
-//            if (StringUtils.isStringNullOrEmpty(commonInputDTO.getBtsStationDTO().getStatus())) {
-//                res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-//                res.setDescription(r.getResourceMessage("bts.status.info.null"));
-//                return res;
-//            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-            res.setDescription(r.getResourceMessage("system.error"));
-        }
-//        } else {
-//            System.out.println("authentication unsuccessful");
-//            return null;
-//        }
-        return res;
-    }
 
     @PostMapping(value = "/updateBTSStation")
     public ExecutionResult updateBTSStation(@RequestHeader("Accept-Language") String language,
@@ -1072,12 +343,7 @@ public class BTSStationCtrl {
             String roleCode = userService.getUserRole(commonInputDTO);
 //            String roleCode = Constant.BTS_ROLES.CMS_BTS_CND_STAFF;
             for (BTSStationDTO btsStationDTO : commonInputDTO.getBtsStationDTOList()) {
-                ExecutionResult tempRes = validateInputUpdate(commonInputDTO, btsStationDTO, language);
-                if (Constant.EXECUTION_ERROR.ERROR.equals(tempRes.getErrorCode())) {
-//                    res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-//                    res.setDescription(tempRes.getDescription());
-                    return tempRes;
-                }
+
 
 //            if (!Constant.BTS_ROLES.CMS_BTS_PNO_STAFF.equals(roleCode) || !Constant.BTS_ROLES.CMS_BTS_TCCN_STAFF.equals(roleCode) || !Constant.BTS_ROLES.CMS_BTS_GRAND_TC_STAFF.equals(roleCode) || !Constant.BTS_ROLES.CMS_BTS_CND_STAFF.equals(roleCode)) {
                 if (Constant.BTS_ROLES.CMS_BTS_PNO_STAFF.equals(roleCode) || Constant.BTS_ROLES.CMS_BTS_TCCN_STAFF.equals(roleCode) || Constant.BTS_ROLES.CMS_BTS_GRAND_TC_STAFF.equals(roleCode) || Constant.BTS_ROLES.CMS_BTS_CND_STAFF.equals(roleCode)) {
@@ -1089,10 +355,10 @@ public class BTSStationCtrl {
                 }
 //            List<OptionSetValueDTO> optionSetValueDTOS = optionSetValueService.getListByOptionSet("STATION_STATUS", language);
 //            res.setData(optionSetValueDTOS);
-                btsStationDTO.setCreatedUser(commonInputDTO.getUserName().split("----")[0]);
-                btsStationDTO.setCreatedDate(String.valueOf(LocalDateTime.now()));
-                btsStationDTO.setLastModifiedUser(commonInputDTO.getUserName().split("----")[0]);
-                btsStationDTO.setLastModifiedDate(String.valueOf(LocalDateTime.now()));
+                btsStationDTO.setCreateBy(commonInputDTO.getUserName().split("----")[0]);
+                btsStationDTO.setCreateDatetime(LocalDateTime.now());
+                btsStationDTO.setUpdateBy(commonInputDTO.getUserName().split("----")[0]);
+                btsStationDTO.setUpdateDatetime(LocalDateTime.now());
 
 //                res.setDescription(Constant.EXECUTION_MESSAGE.OK);
             }
@@ -1442,7 +708,7 @@ public class BTSStationCtrl {
             ArrayList<String> arr = new ArrayList<String>();
             for (BTSStationDTO btsStationDTO : commonInputDTO.getBtsStationDTOList()) {
 //            commonInputDTO.getBtsStationDTO().setApprovedStatus(commonInputDTO.getBtsStationDTO().getApprovedStatus());
-                btsStationDTO.setLastModifiedUser(commonInputDTO.getUserName().split("----")[0]);
+                btsStationDTO.setUpdateBy(commonInputDTO.getUserName().split("----")[0]);
 //                btsStationDTO.setLastModifiedDate(String.valueOf(LocalDateTime.now()));
 //                btsStationDTO.setTurnOffDate(String.valueOf(LocalDateTime.now()));
                 BTSStation station = bTSStationRepo.findById(btsStationDTO.getId()).orElse(null);
@@ -1502,11 +768,11 @@ public class BTSStationCtrl {
                         res.setDescription(r.getResourceMessage("bts.id.info.null"));
                         return res;
                     }
-                    if (StringUtils.isStringNullOrEmpty(btsStationDTO.getApprovedStatus())) {
-                        res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-                        res.setDescription(r.getResourceMessage("bts.approved.status.info.null"));
-                        return res;
-                    }
+//                    if (StringUtils.isStringNullOrEmpty(btsStationDTO.getApprovedStatus())) {
+//                        res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
+//                        res.setDescription(r.getResourceMessage("bts.approved.status.info.null"));
+//                        return res;
+//                    }
                     if (StringUtils.isStringNullOrEmpty(btsStationDTO.getSiteOnNims())) {
                         res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
                         res.setDescription(r.getResourceMessage("bts.site.of.nims.info.null"));
@@ -1579,18 +845,18 @@ public class BTSStationCtrl {
                             return res;
                         }
 
-                        if (StringUtils.isStringNullOrEmpty(btsStationDTO.getFileCR())) {
-                            res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-                            res.setDescription(r.getResourceMessage("bts.station.file.CR.null"));
-                            return res;
-                        }
+//                        if (StringUtils.isStringNullOrEmpty(btsStationDTO.getFileCR())) {
+//                            res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
+//                            res.setDescription(r.getResourceMessage("bts.station.file.CR.null"));
+//                            return res;
+//                        }
 
                     } else {
                         res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
                         res.setDescription(r.getResourceMessage("not.allowed.approved.bts.station"));
                         return res;
                     }
-                    btsStationDTO.setLastModifiedUser(commonInputDTO.getUserName().split("----")[0]);
+                    btsStationDTO.setUpdateBy(commonInputDTO.getUserName().split("----")[0]);
                     btsStationService.turnOffBTSStation(bTSStation, btsStationDTO, staff);
                     arr.add(bTSStation.getSiteOnNims());
                 }

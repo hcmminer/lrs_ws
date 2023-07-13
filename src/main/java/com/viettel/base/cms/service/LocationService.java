@@ -1,9 +1,6 @@
 package com.viettel.base.cms.service;
 
-import com.viettel.base.cms.dto.CommuneDTO;
-import com.viettel.base.cms.dto.DataParams;
-import com.viettel.base.cms.dto.DistrictDTO;
-import com.viettel.base.cms.dto.ProvinceDTO;
+import com.viettel.base.cms.dto.*;
 import com.viettel.base.cms.model.Commune;
 import com.viettel.base.cms.model.District;
 import com.viettel.base.cms.model.Province;
@@ -44,4 +41,5 @@ public interface LocationService {
     List<Province> getListProvinceByCode(String paramString) throws Exception;
     List<District> getListDistrictByIdAndProCode(String paramString, Long paramLong) throws Exception;
     District getListDistrictById(Long paramLong) throws Exception;
+    int updateConstructionStartDateCND(BTSStationDTO btsStationDTO) throws Exception;
 }

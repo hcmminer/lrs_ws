@@ -180,6 +180,13 @@ public class BTSStationCtrl {
         res.setErrorCode(Constant.EXECUTION_ERROR.SUCCESS);
         try {
             Staff staff = userService.getStaffByUserName(commonInputDTO.getUserName().split("----")[0]);
+            commonInputDTO.setAppCode("IMT");
+            String roleCode = userService.getUserRole(commonInputDTO);
+            if (!roleCode.equals(Constant.BTS_ROLES.CMS_BTS_PNO_STAFF)){
+                res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
+                res.setDescription(r.getResourceMessage("not.allowed.create.construction"));
+                return res;
+            }
             ExecutionResult tempRes = validateInputCreate(commonInputDTO, language, 0);
             if (Constant.EXECUTION_ERROR.ERROR.equals(tempRes.getErrorCode())) {
                 return tempRes;
@@ -250,14 +257,40 @@ public class BTSStationCtrl {
                 }
                 if (StringUtils.isStringNullOrEmpty(commonInputDTO.getBtsStationDTO().getUses())) {
                     res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-                    res.setDescription(r.getResourceMessage("bts.contract.no.info.null"));
+                    res.setDescription(r.getResourceMessage("bts.uses.null"));
                     return res;
                 }
-//                if (StringUtils.isStringNullOrEmpty(commonInputDTO.getBtsStationDTO().getSiteOnContract())) {
-//                    res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-//                    res.setDescription(r.getResourceMessage("bts.site.of.nims.info.null"));
-//                    return res;
-//                }
+                if (StringUtils.isStringNullOrEmpty(commonInputDTO.getBtsStationDTO().getTypeRentalArea())) {
+                    res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
+                    res.setDescription(r.getResourceMessage("bts.type.rent.area.null"));
+                    return res;
+                }
+                if (StringUtils.isStringNullOrEmpty(commonInputDTO.getBtsStationDTO().getUnitPrice())) {
+                    res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
+                    res.setDescription(r.getResourceMessage("bts.unit.price.null"));
+                    return res;
+                }
+                if (StringUtils.isStringNullOrEmpty(commonInputDTO.getBtsStationDTO().getStationtype())) {
+                    res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
+                    res.setDescription(r.getResourceMessage("bts.unit.price.null"));
+                    return res;
+                }
+                if (StringUtils.isStringNullOrEmpty(commonInputDTO.getBtsStationDTO().getStationLocate())) {
+                    res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
+                    res.setDescription(r.getResourceMessage("bts.station.locate.null"));
+                    return res;
+                }
+                if (StringUtils.isStringNullOrEmpty(commonInputDTO.getBtsStationDTO().getStationTypeByService())) {
+                    res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
+                    res.setDescription(r.getResourceMessage("bts.unit.price.null"));
+                    return res;
+                }
+                if (StringUtils.isStringNullOrEmpty(commonInputDTO.getBtsStationDTO().getProvinceId())) {
+                    res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
+                    res.setDescription(r.getResourceMessage("province.info.null"));
+                    return res;
+                }
+
                 boolean checkLat = new DataUtil.UsernameValidator().validateNumberDouble(commonInputDTO.getBtsStationDTO().getLatitude());
                 if (!checkLat){
                     res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);

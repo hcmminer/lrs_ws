@@ -706,12 +706,12 @@ public class BTSStationServiceImpl implements BTSStationService {
             if (!StringUtils.isStringNullOrEmpty(btsStationDTO.getSiteOnNims())) {
                 sql.append(" and lower(brp.site_on_nims) like lower(:siteOnNims) ");
             }
-//            if (!StringUtils.isStringNullOrEmpty(btsStationDTO.getProvinceid())) {
-//                sql.append(" and brp.brp.province_id = :provinceId ");
-//            }
-//            if (!StringUtils.isStringNullOrEmpty(btsStationDTO.getDistrictid())) {
-//                sql.append(" and brp.district_id = :districtId ");
-//            }
+            if (!StringUtils.isStringNullOrEmpty(btsStationDTO.getProvinceId())) {
+                sql.append(" and brp.brp.province_id = :provinceId ");
+            }
+            if (!StringUtils.isStringNullOrEmpty(btsStationDTO.getDistrictId())) {
+                sql.append(" and brp.district_id = :districtId ");
+            }
             sql.append(" limit :startRow , :pageLimit ");
             sql.append(" ORDER BY   brp.created_date DESC ");
             Query query = cms.createNativeQuery(sql.toString());
@@ -719,12 +719,12 @@ public class BTSStationServiceImpl implements BTSStationService {
                 if (!StringUtils.isStringNullOrEmpty(btsStationDTO.getSiteOnNims())) {
                     query.setParameter("siteOnNims", "%" + btsStationDTO.getSiteOnNims() + "%");
                 }
-//                if (!StringUtils.isStringNullOrEmpty(btsStationDTO.getProvinceid())) {
-//                    query.setParameter("provinceId", btsStationDTO.getSiteOnNims());
-//                }
-//                if (!StringUtils.isStringNullOrEmpty(btsStationDTO.getDistrictid())) {
-//                    query.setParameter("districtId", btsStationDTO.getDistrictid());
-//                }
+                if (!StringUtils.isStringNullOrEmpty(btsStationDTO.getProvinceId())) {
+                    query.setParameter("provinceId", btsStationDTO.getSiteOnNims());
+                }
+                if (!StringUtils.isStringNullOrEmpty(btsStationDTO.getDistrictId())) {
+                    query.setParameter("districtId", btsStationDTO.getDistrictId());
+                }
                 query.setParameter("lang", lang);
             }
 
@@ -736,17 +736,18 @@ public class BTSStationServiceImpl implements BTSStationService {
                     btsStationDTO1.setSiteOnNims(DataUtils.getString(obj[1]));
                     btsStationDTO1.setLongitude(DataUtils.getString(obj[2]));
                     btsStationDTO1.setLatitude(DataUtils.getString(obj[3]));
-//                    btsStationDTO1.setUses(DataUtils.getString(obj[4]));
-//                    btsStationDTO1.setTyperentalarea(DataUtils.getString(obj[5]));
-//                    btsStationDTO1.setUnitprice(DataUtils.getString(obj[6]));
-                    btsStationDTO1.setId(DataUtils.getLong(obj[0]));
-                    btsStationDTO1.setId(DataUtils.getLong(obj[0]));
-                    btsStationDTO1.setId(DataUtils.getLong(obj[0]));
-                    btsStationDTO1.setId(DataUtils.getLong(obj[0]));
-                    btsStationDTO1.setId(DataUtils.getLong(obj[0]));
-                    btsStationDTO1.setId(DataUtils.getLong(obj[0]));
-                    btsStationDTO1.setId(DataUtils.getLong(obj[0]));
-                    btsStationDTO1.setId(DataUtils.getLong(obj[0]));
+                    btsStationDTO1.setUsesName(DataUtils.getString(obj[4]));
+                    btsStationDTO1.setTypeRentalAreaName(DataUtils.getString(obj[5]));
+                    btsStationDTO1.setUnitPrice(DataUtils.getLong(obj[6]));
+                    btsStationDTO1.setStationtypeName(DataUtils.getString(obj[7]));
+                    btsStationDTO1.setStationTypeByServiceName(DataUtils.getString(obj[8]));
+                    btsStationDTO1.setStationLocateName(DataUtils.getString(obj[9]));
+                    btsStationDTO1.setProvinceId(DataUtils.getLong(obj[10]));
+                    btsStationDTO1.setProvinceName(DataUtils.getString(obj[11]));
+                    btsStationDTO1.setCreateDatetime(DataUtils.stringToLocalDateTme(DataUtils.getString(obj[12])));
+                    btsStationDTO1.setCreateBy(DataUtils.getString(obj[13]));
+                    btsStationDTO1.setUpdateDatetime(DataUtils.stringToLocalDateTme(DataUtils.getString(obj[14])));
+                    btsStationDTO1.setUpdateBy(DataUtils.getString(obj[15]));
                     lstResult.add(btsStationDTO1);
                 }
             }

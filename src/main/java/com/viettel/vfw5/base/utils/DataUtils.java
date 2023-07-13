@@ -27,6 +27,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.viettel.base.cms.common.Constant;
+import com.viettel.base.cms.dto.DataParams;
 import org.apache.commons.lang3.SerializationUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
@@ -236,4 +238,54 @@ public class DataUtils {
         }
     }
     // end game voucher
+
+    public static DataParams getPageInfo(DataParams dataParam, int totalRecord) {
+        DataParams data = new DataParams();
+        Integer currentPage, pageLimit;
+
+        try {
+            currentPage = dataParam.getCurrentPage();
+        } catch (Exception e) {
+            currentPage = null;
+        }
+
+        try {
+            pageLimit = dataParam.getPageLimit();
+        } catch (Exception e) {
+            pageLimit = null;
+        }
+
+        if (currentPage == null || currentPage < 1) {
+            currentPage = Constant.DEFAULT_CURRENT_PAGE;
+        }
+
+        if (pageLimit == null) {
+            pageLimit = Constant.DEFAULT_PAGE_LIMIT;
+        }
+
+        Integer startRow = (currentPage - 1) * pageLimit;
+        Integer endRow = currentPage * pageLimit;
+        if (startRow != 0) {
+            if ((totalRecord - (startRow)) < pageLimit) {
+                endRow = totalRecord;
+            }
+        } else {
+            if (totalRecord < (currentPage*pageLimit)){
+                endRow = totalRecord;
+            }
+        }
+        Integer totalPage = getTotalPage(totalRecord, pageLimit);
+
+        data.setCurrentPage(currentPage);
+        data.setPageLimit(pageLimit);
+        data.setStartRow(startRow);
+        data.setEndRow(endRow);
+        data.setPageTotal(totalPage);
+        data.setRecordTotal(totalRecord);
+
+        return data;
+    }
+    public static int getTotalPage(int totalRecord, int pageLimit) {
+        return (int) Math.ceil((double) totalRecord / pageLimit);
+    }
 }

@@ -266,6 +266,7 @@ public class Constant {
     public static class FTP_CONFIG {
         public final static String PRE = "/u01/pms/tomcat9-8888-view-image/webapps";
     }
-
+    public static int DEFAULT_CURRENT_PAGE = 1;
+    public static int DEFAULT_PAGE_LIMIT = 10;
 
 }

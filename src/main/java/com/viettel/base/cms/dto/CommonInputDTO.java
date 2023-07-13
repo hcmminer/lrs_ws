@@ -43,6 +43,10 @@ public class CommonInputDTO {
     private Long constructionItemId;
     private List<ImageDTO> imageDTOList;
     private String appCode;
+    private Long provinceId;
+    private DistrictDTO districtDTO;
+    private CommuneDTO communeDTO;
+    private DataParams dataParams;
 //    bandv..
     private SearchV1DTO searchV1DTO;
     private OptionSetV1DTO optionSetV1DTO;

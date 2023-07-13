@@ -1,7 +1,5 @@
 package com.viettel.base.cms.model;
 
-import com.viettel.vfw5.base.dto.BaseFWDTO;
-import com.viettel.vfw5.base.model.BaseFWModel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,7 +13,7 @@ import javax.persistence.Table;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "province")
+@Table(name = "commune")
 // causes Lombok to generate toString(), equals(), hashCode(), getter() & setter(), and Required arguments constructor in one go.
 @Data
 // causes Lombok to implement the Builder design pattern for the Pojo class.
@@ -26,33 +24,27 @@ import java.time.LocalDateTime;
 // causes Lombok to generate a constructor with 1 parameter for each field in your class.
 @AllArgsConstructor
 @Component
-public class Province extends BaseFWModel {
+public class Commune {
     @Id
-    @Column(name = "pro_id", nullable = false)
-    private Long proId;
-
-    @Column(name = "pro_code", nullable = false)
-    private String proCode;
-
-    @Column(name = "pro_name", nullable = false)
-    private String proName;
-
+    @Column(name = "id", nullable = false)
+    private Long communeId;
+    @Column(name = "district_id", nullable = false)
+    private Long districtId;
+    @Column(name = "province_id", nullable = false)
+    private Long provinceId;
+    @Column(name = "code", nullable = false)
+    private String communeCode;
+    @Column(name = "name", nullable = false)
+    private String communeName;
     @Column(name = "status", nullable = true)
     private Long status;
-
     @Column(name = "create_datetime", nullable = true)
     private LocalDateTime createDatetime;
-
     @Column(name = "create_by", nullable = true)
     private String createBy;
-
     @Column(name = "update_datetime", nullable = true)
     private LocalDateTime updateDatetime;
-
     @Column(name = "update_by", nullable = true)
     private String updateBy;
-    @Override
-    public BaseFWDTO toDTO() {
-        return null;
-    }
 }
+

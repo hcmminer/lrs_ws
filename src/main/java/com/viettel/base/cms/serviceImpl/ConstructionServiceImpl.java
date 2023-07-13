@@ -1128,7 +1128,7 @@ public class ConstructionServiceImpl implements ConstructionService {
                 if (!StringUtils.isStringNullOrEmpty(c.getDistrict())) {
                     District district = locationService.getListDistrictById(c.getDistrict());
                     if (!StringUtils.isStringNullOrEmpty(district)) {
-                        constructionDTO.setDistrictName(district.getDistName());
+                        constructionDTO.setDistrictName(district.getDistrictName());
                     }
                 }
                 constructionDTO.setStatusName(optionSetValueService.getOptionSetValueNameByValue(

@@ -10,9 +10,10 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "province_district")
+@Table(name = "district")
 // causes Lombok to generate toString(), equals(), hashCode(), getter() & setter(), and Required arguments constructor in one go.
 @Data
 // causes Lombok to implement the Builder design pattern for the Pojo class.
@@ -25,14 +26,22 @@ import javax.persistence.Table;
 @Component
 public class District {
     @Id
-    @Column(name = "dist_id", nullable = false)
-    private Long distId;
-    @Column(name = "pro_id", nullable = false)
-    private Long proId;
-    @Column(name = "dist_name", nullable = false)
-    private String distName;
-    @Column(name = "center_point", nullable = true)
-    private String centerPoint;
-    @Column(name = "def_zoom", nullable = true)
-    private Long defZoom;
+    @Column(name = "district_id", nullable = false)
+    private Long districtId;
+    @Column(name = "province_id", nullable = false)
+    private Long provinceId;
+    @Column(name = "district_name", nullable = false)
+    private String districtName;
+    @Column(name = "district_code", nullable = false)
+    private String districtCode;
+    @Column(name = "create_datetime", nullable = true)
+    private LocalDateTime createDatetime;
+    @Column(name = "create_by", nullable = true)
+    private String createBy;
+    @Column(name = "update_datetime", nullable = true)
+    private LocalDateTime updateDatetime;
+    @Column(name = "update_by", nullable = true)
+    private String updateBy;
+    @Column(name = "status", nullable = true)
+    private Long status;
 }

@@ -9,7 +9,6 @@ import com.viettel.base.cms.dto.OptionSetValueV1DTO;
 
 import java.util.List;
 
-
 @Repository
 public interface OptionSetValueV1Repo extends JpaRepository<OptionSetValueV1, Long> {
     @Query(value = "select ops.value as value, ops.option_set_Id as optionSetId, ops.option_set_value_id as optionSetValueId, ops.name_vi as nameVi, ops.name_la as nameLa, ops.name_en as nameEn, ops.create_datetime as createDatetime, ops.create_by as createBy, " +
@@ -22,7 +21,6 @@ public interface OptionSetValueV1Repo extends JpaRepository<OptionSetValueV1, Lo
             "and ops.status =:status " +
             "and :value is null or trim(ops.value) like %:value% " +
             "order by ops.create_datetime desc ", nativeQuery = true)
-//    @Query("select o from OptionSetValueV1 o where (:optionSetId is null or o.optionSetId = :optionSetId) and (:value is null or trim(o.value) like %:value%)  and o.status = :status order by o.createDatetime desc ")
     List<IOptionSetValueV1> findAllByValueAndStatus(Long optionSetId, String value, Long status);
 
     List<OptionSetValueV1> findAllByOptionSetValueIdNotAndStatus(Long optionSetValueId, Long status);

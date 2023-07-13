@@ -19,5 +19,4 @@ public class UnitDTO {
     private LocalDateTime createDatetime;
     private Long status;
 
-
 }

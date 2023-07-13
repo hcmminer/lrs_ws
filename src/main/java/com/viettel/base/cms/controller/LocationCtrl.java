@@ -886,4 +886,45 @@ public class LocationCtrl {
             return res;
         }
     }
+    @PostMapping("updateConstructionStartDateCND")
+    public ExecutionResult updateConstructionStartDateCND(@RequestHeader("Accept-Language") String language, @RequestBody CommonInputDTO commonInputDTO) {
+        ExecutionResult res = new ExecutionResult();
+        ResourceBundle r = new ResourceBundle(language);
+        String userName = commonInputDTO.getUserName().split("----")[0];
+        res.setErrorCode(Constant.EXECUTION_ERROR.SUCCESS);
+        try {
+            if (StringUtils.isStringNullOrEmpty(commonInputDTO.getBtsStationDTO())) {
+                res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
+                res.setDescription(r.getResourceMessage("bts.station.null"));
+                return res;
+            }
+            if (StringUtils.isStringNullOrEmpty(commonInputDTO.getBtsStationDTO().getId())) {
+                res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
+                res.setDescription(r.getResourceMessage("bts.station.id.null"));
+                return res;
+            }
+            if (StringUtils.isStringNullOrEmpty(commonInputDTO.getBtsStationDTO().getHandoverdate())) {
+                res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
+                res.setDescription(r.getResourceMessage("bts.hand.over.date.null"));
+                return res;
+            }
+            if (StringUtils.isStringNullOrEmpty(commonInputDTO.getBtsStationDTO().getConstructionstartdate())) {
+                res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
+                res.setDescription(r.getResourceMessage("bts.construction.start.date.null"));
+                return res;
+            }
+            int resultCNDUpdate = locationService.updateConstructionStartDateCND(commonInputDTO.getBtsStationDTO());
+            if (resultCNDUpdate != 1) {
+                res.setDescription(r.getResourceMessage("update.construction.start.date.CND.fail"));
+            } else {
+                res.setDescription(r.getResourceMessage("update.construction.start.date.CND.success"));
+            }
+            return res;
+        } catch (Exception e) {
+            e.printStackTrace();
+            res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
+            res.setDescription(r.getResourceMessage("system.error"));
+            return res;
+        }
+    }
 }

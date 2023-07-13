@@ -1,10 +1,7 @@
 package com.viettel.base.cms.serviceImpl;
 
 import com.viettel.base.cms.common.Constant;
-import com.viettel.base.cms.dto.CommuneDTO;
-import com.viettel.base.cms.dto.DataParams;
-import com.viettel.base.cms.dto.DistrictDTO;
-import com.viettel.base.cms.dto.ProvinceDTO;
+import com.viettel.base.cms.dto.*;
 import com.viettel.base.cms.model.Commune;
 import com.viettel.base.cms.model.ConstructionItem;
 import com.viettel.base.cms.model.District;
@@ -977,6 +974,29 @@ public class LocationServiceImpl implements LocationService {
             if (!StringUtils.isStringNullOrEmpty(district))
                 return district;
             return null;
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    @Override
+    public int updateConstructionStartDateCND(BTSStationDTO btsStationDTO) throws Exception {
+        try {
+            String sql = " UPDATE  " +
+                    "      bts_rent_place " +
+                    " SET " +
+                    "      handover_date = :handoverDate, " +
+                    "      construction_start_date = :constructionStartDate, " +
+                    "      construction_note = :btsRenPlaceNote  " +
+                    " WHERE  " +
+                    "      id = :btsRenPlaceId  ";
+            Query query = this.cms.createNativeQuery(sql);
+            query.setParameter("handoverDate", btsStationDTO.getHandoverdate());
+            query.setParameter("constructionStartDate", btsStationDTO.getConstructionstartdate());
+            query.setParameter("btsRenPlaceNote", btsStationDTO.getNotes());
+            query.setParameter("btsRenPlaceId", btsStationDTO.getId());
+            return query.executeUpdate();
         } catch (Exception e) {
             e.printStackTrace();
             throw e;

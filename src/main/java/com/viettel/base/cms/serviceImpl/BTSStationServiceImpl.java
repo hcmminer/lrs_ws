@@ -706,12 +706,12 @@ public class BTSStationServiceImpl implements BTSStationService {
             if (!StringUtils.isStringNullOrEmpty(btsStationDTO.getSiteOnNims())) {
                 sql.append(" and lower(brp.site_on_nims) like lower(:siteOnNims) ");
             }
-            if (!StringUtils.isStringNullOrEmpty(btsStationDTO.getProvinceid())) {
-                sql.append(" and brp.brp.province_id = :provinceId ");
-            }
-            if (!StringUtils.isStringNullOrEmpty(btsStationDTO.getDistrictid())) {
-                sql.append(" and brp.district_id = :districtId ");
-            }
+//            if (!StringUtils.isStringNullOrEmpty(btsStationDTO.getProvinceid())) {
+//                sql.append(" and brp.brp.province_id = :provinceId ");
+//            }
+//            if (!StringUtils.isStringNullOrEmpty(btsStationDTO.getDistrictid())) {
+//                sql.append(" and brp.district_id = :districtId ");
+//            }
             sql.append(" limit :startRow , :pageLimit ");
             sql.append(" ORDER BY   brp.created_date DESC ");
             Query query = cms.createNativeQuery(sql.toString());
@@ -719,12 +719,12 @@ public class BTSStationServiceImpl implements BTSStationService {
                 if (!StringUtils.isStringNullOrEmpty(btsStationDTO.getSiteOnNims())) {
                     query.setParameter("siteOnNims", "%" + btsStationDTO.getSiteOnNims() + "%");
                 }
-                if (!StringUtils.isStringNullOrEmpty(btsStationDTO.getProvinceid())) {
-                    query.setParameter("provinceId", btsStationDTO.getSiteOnNims());
-                }
-                if (!StringUtils.isStringNullOrEmpty(btsStationDTO.getDistrictid())) {
-                    query.setParameter("districtId", btsStationDTO.getDistrictid());
-                }
+//                if (!StringUtils.isStringNullOrEmpty(btsStationDTO.getProvinceid())) {
+//                    query.setParameter("provinceId", btsStationDTO.getSiteOnNims());
+//                }
+//                if (!StringUtils.isStringNullOrEmpty(btsStationDTO.getDistrictid())) {
+//                    query.setParameter("districtId", btsStationDTO.getDistrictid());
+//                }
                 query.setParameter("lang", lang);
             }
 
@@ -736,9 +736,9 @@ public class BTSStationServiceImpl implements BTSStationService {
                     btsStationDTO1.setSiteOnNims(DataUtils.getString(obj[1]));
                     btsStationDTO1.setLongitude(DataUtils.getString(obj[2]));
                     btsStationDTO1.setLatitude(DataUtils.getString(obj[3]));
-                    btsStationDTO1.setUses(DataUtils.getString(obj[4]));
-                    btsStationDTO1.setTyperentalarea(DataUtils.getString(obj[5]));
-                    btsStationDTO1.setUnitprice(DataUtils.getString(obj[6]));
+//                    btsStationDTO1.setUses(DataUtils.getString(obj[4]));
+//                    btsStationDTO1.setTyperentalarea(DataUtils.getString(obj[5]));
+//                    btsStationDTO1.setUnitprice(DataUtils.getString(obj[6]));
                     btsStationDTO1.setId(DataUtils.getLong(obj[0]));
                     btsStationDTO1.setId(DataUtils.getLong(obj[0]));
                     btsStationDTO1.setId(DataUtils.getLong(obj[0]));

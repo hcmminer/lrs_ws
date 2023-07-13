@@ -992,8 +992,8 @@ public class LocationServiceImpl implements LocationService {
                     " WHERE  " +
                     "      id = :btsRenPlaceId  ";
             Query query = this.cms.createNativeQuery(sql);
-            query.setParameter("handoverDate", btsStationDTO.getHandoverdate());
-            query.setParameter("constructionStartDate", btsStationDTO.getConstructionstartdate());
+            query.setParameter("handoverDate", btsStationDTO.getHandoverDate());
+            query.setParameter("constructionStartDate", btsStationDTO.getConstructionStartDate());
             query.setParameter("btsRenPlaceNote", btsStationDTO.getNotes());
             query.setParameter("btsRenPlaceId", btsStationDTO.getId());
             return query.executeUpdate();

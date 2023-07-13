@@ -886,6 +886,7 @@ public class LocationCtrl {
             return res;
         }
     }
+
     @PostMapping("updateConstructionStartDateCND")
     public ExecutionResult updateConstructionStartDateCND(@RequestHeader("Accept-Language") String language, @RequestBody CommonInputDTO commonInputDTO) {
         ExecutionResult res = new ExecutionResult();
@@ -903,12 +904,12 @@ public class LocationCtrl {
                 res.setDescription(r.getResourceMessage("bts.station.id.null"));
                 return res;
             }
-            if (StringUtils.isStringNullOrEmpty(commonInputDTO.getBtsStationDTO().getHandoverdate())) {
+            if (StringUtils.isStringNullOrEmpty(commonInputDTO.getBtsStationDTO().getHandoverDate())) {
                 res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
                 res.setDescription(r.getResourceMessage("bts.hand.over.date.null"));
                 return res;
             }
-            if (StringUtils.isStringNullOrEmpty(commonInputDTO.getBtsStationDTO().getConstructionstartdate())) {
+            if (StringUtils.isStringNullOrEmpty(commonInputDTO.getBtsStationDTO().getConstructionStartDate())) {
                 res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
                 res.setDescription(r.getResourceMessage("bts.construction.start.date.null"));
                 return res;

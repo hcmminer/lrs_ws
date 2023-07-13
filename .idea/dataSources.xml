@@ -1,13 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
-    <data-source source="LOCAL" name="cms@127.0.0.1" uuid="6ee2a78a-c959-4807-b0d3-c113e70b0d4b">
-      <driver-ref>mariadb</driver-ref>
-      <synchronize>true</synchronize>
-      <jdbc-driver>org.mariadb.jdbc.Driver</jdbc-driver>
-      <jdbc-url>jdbc:mariadb://127.0.0.1:3333/cms</jdbc-url>
-      <working-dir>$ProjectFileDir$</working-dir>
-    </data-source>
     <data-source source="LOCAL" name="10.120.52.91" uuid="8a0e8e50-2d07-42e3-b7b9-50e0da4a3493">
       <driver-ref>mariadb</driver-ref>
       <synchronize>true</synchronize>

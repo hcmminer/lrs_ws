@@ -1,5 +1,6 @@
 package com.viettel.base.cms.controller;
 
+import com.viettel.base.cms.common.BaseController;
 import com.viettel.base.cms.common.Constant;
 import com.viettel.base.cms.dto.*;
 import com.viettel.base.cms.model.*;
@@ -44,7 +45,7 @@ import java.util.List;
 @RestController
 @RequestMapping(value = "/api")
 @Slf4j
-public class BTSStationCtrl {
+public class BTSStationCtrl extends BaseController {
 
     @Autowired
     private BTSStationService btsStationService;
@@ -93,19 +94,45 @@ public class BTSStationCtrl {
         res.setErrorCode(Constant.EXECUTION_ERROR.SUCCESS);
 
         try {
+            // Chia page
+            if (StringUtils.isStringNullOrEmpty(commonInputDTO.getDataParams())){
+                return error(r.getResourceMessage("createdDate.checkQr.valid"));
+            } else {
+                if (commonInputDTO.getDataParams().getCurrentPage() == 0){
+                    return error(r.getResourceMessage("validate.param.is.null", "currentPage"));
+                }
+                if (commonInputDTO.getDataParams().getPageLimit() == 0){
+                    return error(r.getResourceMessage("validate.param.is.null", "pageLimit"));
+                }
+            }
             commonInputDTO.setAppCode("IMT");
             String roleCode = userService.getUserRole(commonInputDTO);
-            if (Constant.BTS_ROLES.CMS_BTS_TCCN_STAFF.equals(roleCode)) {
+            if (Constant.LRS_ROLES.LRS_BTS_HTCN.equals(roleCode)) {
+                int totalRecord = btsStationService.totalRecordSearch(commonInputDTO.getDataParams(), commonInputDTO.getBtsStationDTO(), language);
+                DataParams pageInfo = DataUtils.getPageInfo(commonInputDTO.getDataParams(), totalRecord);
+                commonInputDTO.setDataParams(pageInfo);
                 String provinceCode = btsStationService.getProvinceCodeOfStaff(userName);
-                List<BTSStationDTO> btsStationDTOS = btsStationService.searchBTSStation(commonInputDTO.getBtsStationDTO(), language);
-                res.setData(btsStationDTOS);
-            } else if (Constant.BTS_ROLES.CMS_BTS_PNO_STAFF.equals(roleCode)) {
+                List<BTSStationDTO> btsStationDTOS = btsStationService.searchBTSStation(pageInfo, commonInputDTO.getBtsStationDTO(), language);
+                if (btsStationDTOS != null && !btsStationDTOS.isEmpty()){
+                    return successList(btsStationDTOS, pageInfo, Constant.EXECUTION_MESSAGE.OK);
+                }
+
+            } else if (Constant.LRS_ROLES.LRS_BTS_PNO.equals(roleCode)) {
+                int totalRecord = btsStationService.totalRecordSearchPNO(commonInputDTO.getDataParams(), commonInputDTO.getBtsStationDTO(), language);
+                DataParams pageInfo = DataUtils.getPageInfo(commonInputDTO.getDataParams(), totalRecord);
+                commonInputDTO.setDataParams(pageInfo);
                 List<BTSStationDTO> btsStationDTOS = btsStationService.searchBTSStationPNO(commonInputDTO.getBtsStationDTO(), language);
-                res.setData(btsStationDTOS);
-            }
-            else {
-                List<BTSStationDTO> btsStationDTOS = btsStationService.searchBTSStation(commonInputDTO.getBtsStationDTO(), language);
-                res.setData(btsStationDTOS);
+                if (btsStationDTOS != null && !btsStationDTOS.isEmpty()){
+                    return successList(btsStationDTOS, pageInfo, Constant.EXECUTION_MESSAGE.OK);
+                }
+            } else {
+                int totalRecord = btsStationService.totalRecordSearch(commonInputDTO.getDataParams(), commonInputDTO.getBtsStationDTO(), language);
+                DataParams pageInfo = DataUtils.getPageInfo(commonInputDTO.getDataParams(), totalRecord);
+                commonInputDTO.setDataParams(pageInfo);
+                List<BTSStationDTO> btsStationDTOS = btsStationService.searchBTSStation(pageInfo, commonInputDTO.getBtsStationDTO(), language);
+                if (btsStationDTOS != null && !btsStationDTOS.isEmpty()){
+                    return successList(btsStationDTOS, pageInfo, Constant.EXECUTION_MESSAGE.OK);
+                }
             }
             return res;
         } catch (Exception e) {
@@ -182,7 +209,7 @@ public class BTSStationCtrl {
             Staff staff = userService.getStaffByUserName(commonInputDTO.getUserName().split("----")[0]);
             commonInputDTO.setAppCode("IMT");
             String roleCode = userService.getUserRole(commonInputDTO);
-            if (!roleCode.equals(Constant.BTS_ROLES.CMS_BTS_PNO_STAFF)){
+            if (!roleCode.equals(Constant.LRS_ROLES.LRS_BTS_PNO)){
                 res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
                 res.setDescription(r.getResourceMessage("not.allowed.create.construction"));
                 return res;

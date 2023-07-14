@@ -2,6 +2,7 @@ package com.viettel.base.cms.serviceImpl;
 
 import com.viettel.base.cms.common.Constant;
 import com.viettel.base.cms.dto.BTSStationDTO;
+import com.viettel.base.cms.dto.DataParams;
 import com.viettel.base.cms.dto.OptionSetValueDTO;
 import com.viettel.base.cms.dto.OutputCreateConstructionDTO;
 import com.viettel.base.cms.model.BTSStation;
@@ -190,7 +191,7 @@ public class BTSStationServiceImpl implements BTSStationService {
 
 
     @Override
-    public List<BTSStationDTO> searchBTSStation(BTSStationDTO btsStationDTO, String lang) throws Exception {
+    public List<BTSStationDTO> searchBTSStation(DataParams dataParams, BTSStationDTO btsStationDTO, String lang) throws Exception {
         try {
             List<BTSStationDTO> lstResult = new ArrayList<>();
             StringBuilder sql = new StringBuilder();
@@ -329,7 +330,7 @@ public class BTSStationServiceImpl implements BTSStationService {
             if (!StringUtils.isStringNullOrEmpty(btsStationDTO.getContractNo())) {
                 sql.append(" and brp.contract_no = :contractNo ");
             }
-            sql.append(" limit :startRow , :pageLimit ");
+            sql.append(" limit :start_row,:page_limit ");
             sql.append(" ORDER BY   brp.created_date DESC ");
             Query query = cms.createNativeQuery(sql.toString());
             if (!StringUtils.isStringNullOrEmpty(btsStationDTO)) {
@@ -352,6 +353,10 @@ public class BTSStationServiceImpl implements BTSStationService {
                     query.setParameter("contractNo", btsStationDTO.getContractNo());
                 }
                 query.setParameter("lang", lang);
+            }
+            if (!StringUtils.isStringNullOrEmpty(dataParams)) {
+                query.setParameter("start_row", dataParams.getStartRow());
+                query.setParameter("page_limit", dataParams.getPageLimit());
             }
 
             List<Object[]> lst = query.getResultList();
@@ -427,8 +432,70 @@ public class BTSStationServiceImpl implements BTSStationService {
                     btsStationDTO1.setUpdateBy(DataUtils.getString(obj[66]));
                     lstResult.add(btsStationDTO1);
                 }
+            } else {
+                return null;
             }
             return lstResult;
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    @Override
+    public int totalRecordSearch(DataParams conditions, BTSStationDTO btsStationDTO, String lang) {
+        try {
+            StringBuilder sql = new StringBuilder();
+            sql.append(" SELECT count(*) " +
+                    "FROM bts_rent_place brp , province p , district d , commune c  " +
+                    "CROSS JOIN (SELECT :lang AS language_var) AS lang " +
+                    "WHERE brp.province_id = p.pro_id  " +
+                    "and brp.district_id  = d.DISTRICT_ID  " +
+                    "and brp.commune_id = c.ID  ");
+            if (!StringUtils.isStringNullOrEmpty(btsStationDTO.getSiteOnNims())) {
+                sql.append(" and lower(brp.site_on_nims) like lower(:siteOnNims) ");
+            }
+            if (!StringUtils.isStringNullOrEmpty(btsStationDTO.getProvinceId())) {
+                sql.append(" and brp.brp.province_id = :provinceId ");
+            }
+            if (!StringUtils.isStringNullOrEmpty(btsStationDTO.getDistrictId())) {
+                sql.append(" and brp.district_id = :districtId ");
+            }
+            if (!StringUtils.isStringNullOrEmpty(btsStationDTO.getStatus())) {
+                sql.append(" and brp.status = :status ");
+            }
+            if (!StringUtils.isStringNullOrEmpty(btsStationDTO.getApproveStatus())) {
+                sql.append(" and brp.approve_status = :approveStatus ");
+            }
+            if (!StringUtils.isStringNullOrEmpty(btsStationDTO.getContractNo())) {
+                sql.append(" and brp.contract_no = :contractNo ");
+            }
+            sql.append(" limit :startRow , :pageLimit ");
+            sql.append(" ORDER BY   brp.created_date DESC ");
+            Query query = cms.createNativeQuery(sql.toString());
+            if (!StringUtils.isStringNullOrEmpty(btsStationDTO)) {
+                if (!StringUtils.isStringNullOrEmpty(btsStationDTO.getSiteOnNims())) {
+                    query.setParameter("siteOnNims", "%" + btsStationDTO.getSiteOnNims() + "%");
+                }
+                if (!StringUtils.isStringNullOrEmpty(btsStationDTO.getProvinceId())) {
+                    query.setParameter("provinceId", btsStationDTO.getSiteOnNims());
+                }
+                if (!StringUtils.isStringNullOrEmpty(btsStationDTO.getDistrictId())) {
+                    query.setParameter("districtId", btsStationDTO.getDistrictId());
+                }
+                if (!StringUtils.isStringNullOrEmpty(btsStationDTO.getStatus())) {
+                    query.setParameter("status", btsStationDTO.getStatus());
+                }
+                if (!StringUtils.isStringNullOrEmpty(btsStationDTO.getApproveStatus())) {
+                    query.setParameter("approveStatus", btsStationDTO.getApproveStatus());
+                }
+                if (!StringUtils.isStringNullOrEmpty(btsStationDTO.getContractNo())) {
+                    query.setParameter("contractNo", btsStationDTO.getContractNo());
+                }
+                query.setParameter("lang", lang);
+            }
+
+            return ((Number) query.getSingleResult()).intValue();
         } catch (Exception e) {
             e.printStackTrace();
             throw e;
@@ -911,6 +978,48 @@ public class BTSStationServiceImpl implements BTSStationService {
             }
             List<String> lst = query.getResultList();
             return lst;
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    @Override
+    public int totalRecordSearchPNO(DataParams conditions, BTSStationDTO btsStationDTO, String lang) {
+        try {
+            StringBuilder sql = new StringBuilder();
+            sql.append(" SELECT  count (*) " +
+                    "FROM bts_rent_place brp , province p , district d , commune c  " +
+                    "CROSS JOIN (SELECT :lang AS language_var) AS lang " +
+                    "WHERE brp.province_id = p.pro_id  " +
+                    "and brp.district_id  = d.DISTRICT_ID  " +
+                    "and brp.commune_id = c.ID  ");
+            if (!StringUtils.isStringNullOrEmpty(btsStationDTO.getSiteOnNims())) {
+                sql.append(" and lower(brp.site_on_nims) like lower(:siteOnNims) ");
+            }
+            if (!StringUtils.isStringNullOrEmpty(btsStationDTO.getProvinceId())) {
+                sql.append(" and brp.brp.province_id = :provinceId ");
+            }
+            if (!StringUtils.isStringNullOrEmpty(btsStationDTO.getDistrictId())) {
+                sql.append(" and brp.district_id = :districtId ");
+            }
+            sql.append(" limit :startRow , :pageLimit ");
+            sql.append(" ORDER BY   brp.created_date DESC ");
+            Query query = cms.createNativeQuery(sql.toString());
+            if (!StringUtils.isStringNullOrEmpty(btsStationDTO)) {
+                if (!StringUtils.isStringNullOrEmpty(btsStationDTO.getSiteOnNims())) {
+                    query.setParameter("siteOnNims", "%" + btsStationDTO.getSiteOnNims() + "%");
+                }
+                if (!StringUtils.isStringNullOrEmpty(btsStationDTO.getProvinceId())) {
+                    query.setParameter("provinceId", btsStationDTO.getSiteOnNims());
+                }
+                if (!StringUtils.isStringNullOrEmpty(btsStationDTO.getDistrictId())) {
+                    query.setParameter("districtId", btsStationDTO.getDistrictId());
+                }
+                query.setParameter("lang", lang);
+            }
+
+            return ((Number) query.getSingleResult()).intValue();
         } catch (Exception e) {
             e.printStackTrace();
             throw e;

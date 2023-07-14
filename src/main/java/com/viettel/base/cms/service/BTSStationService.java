@@ -2,6 +2,7 @@ package com.viettel.base.cms.service;
 
 import com.viettel.base.cms.dto.BTSStationDTO;
 import com.viettel.base.cms.dto.ConstructionDTO;
+import com.viettel.base.cms.dto.DataParams;
 import com.viettel.base.cms.model.BTSStation;
 import com.viettel.base.cms.model.Construction;
 import com.viettel.base.cms.model.Staff;
@@ -11,7 +12,9 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 public interface BTSStationService {
-    List<BTSStationDTO> searchBTSStation(BTSStationDTO btsStationDTO, String lang) throws Exception;
+    List<BTSStationDTO> searchBTSStation(DataParams dataParams, BTSStationDTO btsStationDTO, String lang) throws Exception;
+
+    int totalRecordSearch(DataParams conditions, BTSStationDTO btsStationDTO, String lang);
 
     void createBTSStation(BTSStationDTO btsStationDTO, Staff staff) throws Exception;
 
@@ -38,6 +41,8 @@ public interface BTSStationService {
     Long getProvinceIdByCode(String provinceCode) throws Exception;
 
     List<String> getListIsdnByDeptCode(String deptCode) throws Exception;
+
+    int totalRecordSearchPNO(DataParams conditions, BTSStationDTO btsStationDTO, String lang);
 
     List<BTSStationDTO> searchBTSStationPNO(BTSStationDTO btsStationDTO, String lang) throws Exception;
 

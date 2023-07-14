@@ -113,7 +113,7 @@ public class LocationCtrl {
                 res.setDescription(r.getResourceMessage("province.code.null"));
                 return res;
             }
-            if (commonInputDTO.getProvinceDTO().getProCode().length() > 3L) {
+            if ((commonInputDTO.getProvinceDTO().getProCode().trim()).length() > 50L) {
                 res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
                 res.setDescription(r.getResourceMessage("check.province.code.length"));
                 return res;
@@ -129,7 +129,7 @@ public class LocationCtrl {
                 res.setDescription(r.getResourceMessage("province.name.null"));
                 return res;
             }
-            if (commonInputDTO.getProvinceDTO().getProName().length() > 50L) {
+            if ((commonInputDTO.getProvinceDTO().getProName().trim()).length() > 50L) {
                 res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
                 res.setDescription(r.getResourceMessage("check.province.name.length"));
                 return res;
@@ -192,7 +192,7 @@ public class LocationCtrl {
                         res.setDescription(r.getResourceMessage("province.code.null"));
                         return res;
                     }
-                    if (commonInputDTO.getProvinceDTO().getProCode().length() > 3L) {
+                    if ((commonInputDTO.getProvinceDTO().getProCode().trim()).length() > 50L) {
                         res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
                         res.setDescription(r.getResourceMessage("check.province.code.length"));
                         return res;
@@ -210,7 +210,7 @@ public class LocationCtrl {
                         res.setDescription(r.getResourceMessage("province.name.null"));
                         return res;
                     }
-                    if (commonInputDTO.getProvinceDTO().getProName().length() > 50L) {
+                    if ((commonInputDTO.getProvinceDTO().getProName().trim()).length() > 50L) {
                         res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
                         res.setDescription(r.getResourceMessage("check.province.name.length"));
                         return res;
@@ -398,7 +398,7 @@ public class LocationCtrl {
                 res.setDescription(r.getResourceMessage("province.check.id.delete"));
                 return res;
             }
-            if (commonInputDTO.getDistrictDTO().getDistCode().length() > 3L) {
+            if ((commonInputDTO.getDistrictDTO().getDistCode().trim()).length() > 50L) {
                 res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
                 res.setDescription(r.getResourceMessage("check.district.code.length"));
                 return res;
@@ -409,7 +409,7 @@ public class LocationCtrl {
                 res.setDescription(r.getResourceMessage("district.code.duplicate"));
                 return res;
             }
-            if (commonInputDTO.getDistrictDTO().getDistName().length() > 50L) {
+            if ((commonInputDTO.getDistrictDTO().getDistName().trim()).length() > 50L) {
                 res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
                 res.setDescription(r.getResourceMessage("check.district.name.length"));
                 return res;
@@ -485,7 +485,7 @@ public class LocationCtrl {
                         res.setDescription(r.getResourceMessage("district.code.null"));
                         return res;
                     }
-                    if (commonInputDTO.getDistrictDTO().getProCode().length() > 3L) {
+                    if ((commonInputDTO.getDistrictDTO().getDistCode().trim()).length() > 50L) {
                         res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
                         res.setDescription(r.getResourceMessage("check.district.code.length"));
                         return res;
@@ -503,7 +503,7 @@ public class LocationCtrl {
                         res.setDescription(r.getResourceMessage("district.name.null"));
                         return res;
                     }
-                    if (commonInputDTO.getDistrictDTO().getProName().length() > 50L) {
+                    if ((commonInputDTO.getDistrictDTO().getDistName().trim()).length() > 50L) {
                         res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
                         res.setDescription(r.getResourceMessage("check.district.name.length"));
                         return res;
@@ -732,7 +732,7 @@ public class LocationCtrl {
                 res.setDescription(r.getResourceMessage("district.check.id.delete"));
                 return res;
             }
-            if (commonInputDTO.getCommuneDTO().getCommuneCode().length() > 3L) {
+            if ((commonInputDTO.getCommuneDTO().getCommuneCode().trim()).length() > 50L) {
                 res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
                 res.setDescription(r.getResourceMessage("check.commune.code.length"));
                 return res;
@@ -743,7 +743,7 @@ public class LocationCtrl {
                 res.setDescription(r.getResourceMessage("commune.code.duplicate"));
                 return res;
             }
-            if (commonInputDTO.getCommuneDTO().getCommuneName().length() > 50L) {
+            if ((commonInputDTO.getCommuneDTO().getCommuneName().trim()).length() > 50L) {
                 res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
                 res.setDescription(r.getResourceMessage("check.commune.name.length"));
                 return res;
@@ -832,7 +832,7 @@ public class LocationCtrl {
                         res.setDescription(r.getResourceMessage("commune.code.null"));
                         return res;
                     }
-                    if (commonInputDTO.getCommuneDTO().getCommuneCode().length() > 3L) {
+                    if ((commonInputDTO.getCommuneDTO().getCommuneCode().trim()).length() > 50L) {
                         res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
                         res.setDescription(r.getResourceMessage("check.commune.code.length"));
                         return res;
@@ -855,7 +855,7 @@ public class LocationCtrl {
                         res.setDescription(r.getResourceMessage("commune.code.null"));
                         return res;
                     }
-                    if (commonInputDTO.getCommuneDTO().getCommuneName().length() > 50L) {
+                    if ((commonInputDTO.getCommuneDTO().getCommuneName().trim()).length() > 50L) {
                         res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
                         res.setDescription(r.getResourceMessage("check.commune.name.length"));
                         return res;

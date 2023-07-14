@@ -1,23 +1,15 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-package com.viettel.base.cms.dto;
+package com.viettel.base.cms.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.stereotype.Component;
 
+import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.Date;
 
-/**
- *
- * @author ADMIN
- */
+@Entity
+@Table(name = "province")
 @Data
 // causes Lombok to implement the Builder design pattern for the Pojo class.
 // usage can be seen in DefaultBeersLoader.java -> createNewBeer() method.
@@ -26,14 +18,30 @@ import java.util.Date;
 @NoArgsConstructor
 // causes Lombok to generate a constructor with 1 parameter for each field in your class.
 @AllArgsConstructor
-@Component
-public class ProvinceDTO {
+public class ProvinceV1Model {
+    @Id
+    @Column(name = "pro_id")
     private Long proId;
+
+    @Column(name = "pro_code")
     private String proCode;
+
+    @Column(name = "pro_name")
     private String proName;
-    private Long status;
+
+    @Column(name = "status")
+    private String status;
+
+    @Column(name = "create_datetime")
     private LocalDateTime createDatetime;
+
+    @Column(name = "create_by")
     private String createBy;
+
+    @Column(name = "update_datetime")
     private LocalDateTime updateDatetime;
+
+    @Column(name = "update_by")
     private String updateBy;
+
 }

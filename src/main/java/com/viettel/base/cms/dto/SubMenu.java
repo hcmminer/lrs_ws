@@ -6,6 +6,16 @@ public class SubMenu {
     String code; //: 'ALARM_DASHBOARD.ALARM_DASHBOARD',
     String bullet; //: 'dot',
     String page; //: '/dashboard-management/dashboard-group',
+    Long ord;
+
+    public Long getOrd() {
+        return ord;
+    }
+
+    public void setOrd(long ord) {
+        this.ord = ord;
+    }
+
 
     public String getTitle() {
         return title;

@@ -105,7 +105,7 @@ public class BTSStationDTO {
     private String createBy;
     private LocalDateTime updateDatetime;
     private String updateBy;
-
+    private FileDTO fileDTO;
 
 
 }

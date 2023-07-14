@@ -43,14 +43,14 @@ public class BTSStationDTO {
     private String stationLocateName;
     private Long provinceId;
     private Long districtId;
-    private Long communeid;
+    private Long communeId;
     private String provinceName;
     private String districtName;
     private String communeName;
     private Long rentPosition;
     private String rentPositionName;
     private String notes;
-    private Long constructionpermit;
+    private Long constructionPermit;
     private String inforStatus;
     private String contractNo;
     private LocalDateTime signDateContract;
@@ -82,6 +82,7 @@ public class BTSStationDTO {
     private Long rentContractType;
     private String rentContractTypeName;
     private Long timeContractType;
+    private String timeContractTypeName;
     private String rentalUnitName;
     private String taxCode;
     private String benefiEntityName;

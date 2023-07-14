@@ -39,6 +39,7 @@ import javax.persistence.Query;
 import java.io.ByteArrayOutputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -190,11 +191,271 @@ public class BTSStationServiceImpl implements BTSStationService {
 
     @Override
     public List<BTSStationDTO> searchBTSStation(BTSStationDTO btsStationDTO, String lang) throws Exception {
-        return null;
+        try {
+            List<BTSStationDTO> lstResult = new ArrayList<>();
+            StringBuilder sql = new StringBuilder();
+            sql.append(" SELECT  " +
+                    "    brp.id, " +
+                    "    brp.site_on_nims, " +
+                    "    brp.long_value, " +
+                    "    brp.lat_value, " +
+                    "    (CASE  " +
+                    "        WHEN language_var = 'vi' THEN (SELECT osv.name_vi FROM option_set_value osv WHERE osv.option_set_value_id = brp.uses) " +
+                    "        WHEN language_var = 'en' THEN (SELECT osv.name_en FROM option_set_value osv WHERE osv.option_set_value_id = brp.uses) " +
+                    "        WHEN language_var = 'la' THEN (SELECT osv.name_la FROM option_set_value osv WHERE osv.option_set_value_id = brp.uses) " +
+                    "    END) AS uses, " +
+                    "    (CASE  " +
+                    "        WHEN language_var = 'vi' THEN (SELECT osv.name_vi FROM option_set_value osv WHERE osv.option_set_value_id = brp.type_rental_area) " +
+                    "        WHEN language_var = 'en' THEN (SELECT osv.name_en FROM option_set_value osv WHERE osv.option_set_value_id = brp.type_rental_area) " +
+                    "        WHEN language_var = 'la' THEN (SELECT osv.name_la FROM option_set_value osv WHERE osv.option_set_value_id = brp.type_rental_area) " +
+                    "    END) AS type_rental_area, " +
+                    "    brp.unit_price, " +
+                    "    (CASE  " +
+                    "        WHEN language_var = 'vi' THEN (SELECT osv.name_vi FROM option_set_value osv WHERE osv.option_set_value_id = brp.station_type) " +
+                    "        WHEN language_var = 'en' THEN (SELECT osv.name_en FROM option_set_value osv WHERE osv.option_set_value_id = brp.station_type) " +
+                    "        WHEN language_var = 'la' THEN (SELECT osv.name_la FROM option_set_value osv WHERE osv.option_set_value_id = brp.station_type) " +
+                    "    END) AS station_type, " +
+                    "    (CASE  " +
+                    "        WHEN language_var = 'vi' THEN (SELECT osv.name_vi FROM option_set_value osv WHERE osv.option_set_value_id = brp.station_type_by_service) " +
+                    "        WHEN language_var = 'en' THEN (SELECT osv.name_en FROM option_set_value osv WHERE osv.option_set_value_id = brp.station_type_by_service) " +
+                    "        WHEN language_var = 'la' THEN (SELECT osv.name_la FROM option_set_value osv WHERE osv.option_set_value_id = brp.station_type_by_service) " +
+                    "    END) AS station_type_by_service, " +
+                    "    (CASE  " +
+                    "        WHEN language_var = 'vi' THEN (SELECT osv.name_vi FROM option_set_value osv WHERE osv.option_set_value_id = brp.station_locate) " +
+                    "        WHEN language_var = 'en' THEN (SELECT osv.name_en FROM option_set_value osv WHERE osv.option_set_value_id = brp.station_locate) " +
+                    "        WHEN language_var = 'la' THEN (SELECT osv.name_la FROM option_set_value osv WHERE osv.option_set_value_id = brp.station_locate) " +
+                    "    END) AS station_locate, " +
+                    "    brp.province_id , " +
+                    "    p.pro_name province_name,  " +
+                    "    brp.district_id , " +
+                    "    d.DISTRICT_NAME , " +
+                    "    brp.commune_id , " +
+                    "    c.NAME , " +
+                    "    (CASE " +
+                    "        WHEN language_var = 'vi' THEN (SELECT osv.name_vi FROM option_set_value osv WHERE osv.option_set_value_id = brp.rent_position) " +
+                    "        WHEN language_var = 'en' THEN (SELECT osv.name_en FROM option_set_value osv WHERE osv.option_set_value_id = brp.rent_position) " +
+                    "        WHEN language_var = 'la' THEN (SELECT osv.name_la FROM option_set_value osv WHERE osv.option_set_value_id = brp.rent_position) " +
+                    "    END) AS rent_position, " +
+                    "    brp.notes , " +
+                    "    brp.construction_permit , " +
+                    "    brp.infor_status , " +
+                    "    brp.contract_no ,  " +
+                    "    brp.sign_date_contract , " +
+                    "    brp.start_date_contract , " +
+                    "    brp.end_date_contract , " +
+                    "    brp.start_date_payment , " +
+                    "    brp.end_date_payment , " +
+                    "    brp.rent_period , " +
+                    "    (CASE  " +
+                    "        WHEN language_var = 'vi' THEN (SELECT osv.name_vi FROM option_set_value osv WHERE osv.option_set_value_id = brp.rent_type) " +
+                    "        WHEN language_var = 'en' THEN (SELECT osv.name_en FROM option_set_value osv WHERE osv.option_set_value_id = brp.rent_type) " +
+                    "        WHEN language_var = 'la' THEN (SELECT osv.name_la FROM option_set_value osv WHERE osv.option_set_value_id = brp.rent_type) " +
+                    "    END) AS rent_type, " +
+                    "    brp.rent_area , " +
+                    "    brp.is_vat , " +
+                    "    brp.vat_rate , " +
+                    "    (CASE  " +
+                    "        WHEN language_var = 'vi' THEN (SELECT osv.name_vi FROM option_set_value osv WHERE osv.option_set_value_id = brp.currency_type) " +
+                    "        WHEN language_var = 'en' THEN (SELECT osv.name_en FROM option_set_value osv WHERE osv.option_set_value_id = brp.currency_type) " +
+                    "        WHEN language_var = 'la' THEN (SELECT osv.name_la FROM option_set_value osv WHERE osv.option_set_value_id = brp.currency_type) " +
+                    "    END) AS currency_type, " +
+                    "    brp.exchange_rate , " +
+                    "    brp.total_rent_value , " +
+                    "    brp.num_month_payment_1 , " +
+                    "    brp.num_month_payment_2 , " +
+                    "    brp.num_month_payment_3 , " +
+                    "    brp.num_month_payment_4 , " +
+                    "    brp.num_month_payment_5 , " +
+                    "    brp.num_month_payment_6 , " +
+                    "    brp.num_month_payment_7 , " +
+                    "    brp.num_month_payment_8 , " +
+                    "    brp.num_month_payment_9 , " +
+                    "    brp.num_month_payment_10 , " +
+                    "    (CASE  " +
+                    "        WHEN language_var = 'vi' THEN (SELECT osv.name_vi FROM option_set_value osv WHERE osv.option_set_value_id = brp.rent_contract_type) " +
+                    "        WHEN language_var = 'en' THEN (SELECT osv.name_en FROM option_set_value osv WHERE osv.option_set_value_id = brp.rent_contract_type) " +
+                    "        WHEN language_var = 'la' THEN (SELECT osv.name_la FROM option_set_value osv WHERE osv.option_set_value_id = brp.rent_contract_type) " +
+                    "    END) AS rent_contract_type, " +
+                    "    (CASE  " +
+                    "        WHEN language_var = 'vi' THEN (SELECT osv.name_vi FROM option_set_value osv WHERE osv.option_set_value_id = brp.time_contract_type) " +
+                    "        WHEN language_var = 'en' THEN (SELECT osv.name_en FROM option_set_value osv WHERE osv.option_set_value_id = brp.time_contract_type) " +
+                    "        WHEN language_var = 'la' THEN (SELECT osv.name_la FROM option_set_value osv WHERE osv.option_set_value_id = brp.time_contract_type) " +
+                    "    END) AS time_contract_type, " +
+                    "    brp.rental_unit_name , " +
+                    "    brp.tax_code , " +
+                    "    brp.benefi_entity_name , " +
+                    "    brp.benefi_entity_num , " +
+                    "    brp.benefi_bank_code , " +
+                    "    (CASE  " +
+                    "        WHEN language_var = 'vi' THEN (SELECT osv.name_vi FROM option_set_value osv WHERE osv.option_set_value_id = brp.landowner_type) " +
+                    "        WHEN language_var = 'en' THEN (SELECT osv.name_en FROM option_set_value osv WHERE osv.option_set_value_id = brp.landowner_type) " +
+                    "        WHEN language_var = 'la' THEN (SELECT osv.name_la FROM option_set_value osv WHERE osv.option_set_value_id = brp.landowner_type) " +
+                    "    END) AS landowner_type, " +
+                    "    brp.paid_to_maturity , " +
+                    "    brp.paid_to_year , " +
+                    "    brp.status , " +
+                    "    brp.cancel_reason , " +
+                    "    brp.approve_status , " +
+                    "    brp.handover_date , " +
+                    "    brp.construction_start_date , " +
+                    "    brp.construction_note , " +
+                    "    brp.bts_aired_date , " +
+                    "    brp.bts_status , " +
+                    "    brp.turn_off_date , " +
+                    "    brp.create_datetime,  " +
+                    "    brp.create_by , " +
+                    "    brp.update_datetime , " +
+                    "    brp.update_by  " +
+                    "FROM bts_rent_place brp , province p , district d , commune c  " +
+                    "CROSS JOIN (SELECT :lang AS language_var) AS lang " +
+                    "WHERE brp.province_id = p.pro_id  " +
+                    "and brp.district_id  = d.DISTRICT_ID  " +
+                    "and brp.commune_id = c.ID  ");
+            if (!StringUtils.isStringNullOrEmpty(btsStationDTO.getSiteOnNims())) {
+                sql.append(" and lower(brp.site_on_nims) like lower(:siteOnNims) ");
+            }
+            if (!StringUtils.isStringNullOrEmpty(btsStationDTO.getProvinceId())) {
+                sql.append(" and brp.brp.province_id = :provinceId ");
+            }
+            if (!StringUtils.isStringNullOrEmpty(btsStationDTO.getDistrictId())) {
+                sql.append(" and brp.district_id = :districtId ");
+            }
+            if (!StringUtils.isStringNullOrEmpty(btsStationDTO.getStatus())) {
+                sql.append(" and brp.status = :status ");
+            }
+            if (!StringUtils.isStringNullOrEmpty(btsStationDTO.getApproveStatus())) {
+                sql.append(" and brp.approve_status = :approveStatus ");
+            }
+            if (!StringUtils.isStringNullOrEmpty(btsStationDTO.getContractNo())) {
+                sql.append(" and brp.contract_no = :contractNo ");
+            }
+            sql.append(" limit :startRow , :pageLimit ");
+            sql.append(" ORDER BY   brp.created_date DESC ");
+            Query query = cms.createNativeQuery(sql.toString());
+            if (!StringUtils.isStringNullOrEmpty(btsStationDTO)) {
+                if (!StringUtils.isStringNullOrEmpty(btsStationDTO.getSiteOnNims())) {
+                    query.setParameter("siteOnNims", "%" + btsStationDTO.getSiteOnNims() + "%");
+                }
+                if (!StringUtils.isStringNullOrEmpty(btsStationDTO.getProvinceId())) {
+                    query.setParameter("provinceId", btsStationDTO.getSiteOnNims());
+                }
+                if (!StringUtils.isStringNullOrEmpty(btsStationDTO.getDistrictId())) {
+                    query.setParameter("districtId", btsStationDTO.getDistrictId());
+                }
+                if (!StringUtils.isStringNullOrEmpty(btsStationDTO.getStatus())) {
+                    query.setParameter("status", btsStationDTO.getStatus());
+                }
+                if (!StringUtils.isStringNullOrEmpty(btsStationDTO.getApproveStatus())) {
+                    query.setParameter("approveStatus", btsStationDTO.getApproveStatus());
+                }
+                if (!StringUtils.isStringNullOrEmpty(btsStationDTO.getContractNo())) {
+                    query.setParameter("contractNo", btsStationDTO.getContractNo());
+                }
+                query.setParameter("lang", lang);
+            }
+
+            List<Object[]> lst = query.getResultList();
+            if (!lst.isEmpty() && lst != null) {
+                for (Object[] obj : lst) {
+                    BTSStationDTO btsStationDTO1 = new BTSStationDTO();
+                    btsStationDTO1.setId(DataUtils.getLong(obj[0]));
+                    btsStationDTO1.setSiteOnNims(DataUtils.getString(obj[1]));
+                    btsStationDTO1.setLongitude(DataUtils.getString(obj[2]));
+                    btsStationDTO1.setLatitude(DataUtils.getString(obj[3]));
+                    btsStationDTO1.setUsesName(DataUtils.getString(obj[4]));
+                    btsStationDTO1.setTypeRentalAreaName(DataUtils.getString(obj[5]));
+                    btsStationDTO1.setUnitPrice(DataUtils.getLong(obj[6]));
+                    btsStationDTO1.setStationtypeName(DataUtils.getString(obj[7]));
+                    btsStationDTO1.setStationTypeByServiceName(DataUtils.getString(obj[8]));
+                    btsStationDTO1.setStationLocateName(DataUtils.getString(obj[9]));
+                    btsStationDTO1.setProvinceId(DataUtils.getLong(obj[10]));
+                    btsStationDTO1.setProvinceName(DataUtils.getString(obj[11]));
+                    btsStationDTO1.setDistrictId(DataUtils.getLong(obj[12]));
+                    btsStationDTO1.setDistrictName(DataUtils.getString(obj[13]));
+                    btsStationDTO1.setCommuneId(DataUtils.getLong(obj[14]));
+                    btsStationDTO1.setCommuneName(DataUtils.getString(obj[15]));
+                    btsStationDTO1.setRentPositionName(DataUtils.getString(obj[16]));
+                    btsStationDTO1.setNotes(DataUtils.getString(obj[17]));
+                    btsStationDTO1.setConstructionPermit(DataUtils.getLong(obj[18]));
+                    btsStationDTO1.setInforStatus(DataUtils.getString(obj[19]));
+                    btsStationDTO1.setContractNo(DataUtils.getString(obj[20]));
+                    btsStationDTO1.setSignDateContract(DataUtils.stringToLocalDateTme(DataUtils.getString(obj[21])));
+                    btsStationDTO1.setStartDateContract(DataUtils.stringToLocalDateTme(DataUtils.getString(obj[22])));
+                    btsStationDTO1.setEndDateContract(DataUtils.stringToLocalDateTme(DataUtils.getString(obj[23])));
+                    btsStationDTO1.setStartDatePayment(DataUtils.stringToLocalDateTme(DataUtils.getString(obj[24])));
+                    btsStationDTO1.setEndDatePayment(DataUtils.stringToLocalDateTme(DataUtils.getString(obj[25])));
+                    btsStationDTO1.setRentPeriod(DataUtils.getLong(obj[26]));
+                    btsStationDTO1.setRentTypeName(DataUtils.getString(obj[27]));
+                    btsStationDTO1.setRentArea(DataUtils.getLong(obj[28]));
+                    btsStationDTO1.setIsVat(DataUtils.getLong(obj[29]));
+                    btsStationDTO1.setVatRate(DataUtils.getLong(obj[30]));
+                    btsStationDTO1.setCurrencyTypeName(DataUtils.getString(obj[31]));
+                    btsStationDTO1.setExchangeRate(DataUtils.getLong(obj[32]));
+                    btsStationDTO1.setTotalRentValue(DataUtils.getString(obj[33]));
+                    btsStationDTO1.setNumMonthPayment1(DataUtils.getLong(obj[34]));
+                    btsStationDTO1.setNumMonthPayment2(DataUtils.getLong(obj[35]));
+                    btsStationDTO1.setNumMonthPayment3(DataUtils.getLong(obj[36]));
+                    btsStationDTO1.setNumMonthPayment4(DataUtils.getLong(obj[37]));
+                    btsStationDTO1.setNumMonthPayment5(DataUtils.getLong(obj[38]));
+                    btsStationDTO1.setNumMonthPayment6(DataUtils.getLong(obj[39]));
+                    btsStationDTO1.setNumMonthPayment7(DataUtils.getLong(obj[40]));
+                    btsStationDTO1.setNumMonthPayment8(DataUtils.getLong(obj[41]));
+                    btsStationDTO1.setNumMonthPayment9(DataUtils.getLong(obj[42]));
+                    btsStationDTO1.setNumMonthPayment10(DataUtils.getLong(obj[43]));
+                    btsStationDTO1.setRentContractTypeName(DataUtils.getString(obj[44]));
+                    btsStationDTO1.setTimeContractTypeName(DataUtils.getString(obj[45]));
+                    btsStationDTO1.setRentalUnitName(DataUtils.getString(obj[46]));
+                    btsStationDTO1.setTaxCode(DataUtils.getString(obj[47]));
+                    btsStationDTO1.setBenefiEntityName(DataUtils.getString(obj[48]));
+                    btsStationDTO1.setBenefiEntityNum(DataUtils.getString(obj[49]));
+                    btsStationDTO1.setBenefiBankCode(DataUtils.getString(obj[50]));
+                    btsStationDTO1.setLandownerTypeName(DataUtils.getString(obj[51]));
+                    btsStationDTO1.setPaidToMaturity(DataUtils.getString(obj[52]));
+                    btsStationDTO1.setPaidToYear(DataUtils.getString(obj[53]));
+                    btsStationDTO1.setStatus(DataUtils.getLong(obj[54]));
+                    btsStationDTO1.setCancelReason(DataUtils.getString(obj[55]));
+                    btsStationDTO1.setApproveStatus(DataUtils.getLong(obj[56]));
+                    btsStationDTO1.setHandoverDate(DataUtils.stringToLocalDateTme(DataUtils.getString(obj[57])));
+                    btsStationDTO1.setConstructionStartDate(DataUtils.stringToLocalDateTme(DataUtils.getString(obj[58])));
+                    btsStationDTO1.setConstructionNote(DataUtils.getString(obj[59]));
+                    btsStationDTO1.setBtsAiredDate(DataUtils.stringToLocalDateTme(DataUtils.getString(obj[60])));
+                    btsStationDTO1.setBtsStatus(DataUtils.getLong(obj[61]));
+                    btsStationDTO1.setTurnOffDate(DataUtils.stringToLocalDateTme(DataUtils.getString(obj[62])));
+                    btsStationDTO1.setCreateDatetime(DataUtils.stringToLocalDateTme(DataUtils.getString(obj[63])));
+                    btsStationDTO1.setCreateBy(DataUtils.getString(obj[64]));
+                    btsStationDTO1.setUpdateDatetime(DataUtils.stringToLocalDateTme(DataUtils.getString(obj[65])));
+                    btsStationDTO1.setUpdateBy(DataUtils.getString(obj[66]));
+                    lstResult.add(btsStationDTO1);
+                }
+            }
+            return lstResult;
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
     }
 
     @Override
     public void createBTSStation(BTSStationDTO btsStationDTO, Staff staff) throws Exception {
+        //tao ban ghi
+        BTSStation btsStation = new BTSStation();
+        Long id = DataUtils.getSequence(cms, "BTS_RENT_PLACE_SEQ");
+        btsStation.setId(id);
+        btsStation.setSiteOnNims(btsStationDTO.getSiteOnNims());
+        btsStation.setLatitude(btsStationDTO.getLatitude());
+        btsStation.setLongitude(btsStationDTO.getLongitude());
+        btsStation.setUses(btsStationDTO.getUses());
+        btsStation.setTypeRentalArea(btsStationDTO.getTypeRentalArea());
+        btsStation.setUnitPrice(btsStationDTO.getUnitPrice());
+        btsStation.setStationtype(btsStationDTO.getStationtype());
+        btsStation.setStationTypeByService(btsStationDTO.getStationTypeByService());
+        btsStation.setStationLocate(btsStationDTO.getStationLocate());
+        btsStation.setProvinceId(btsStationDTO.getProvinceId());
+        btsStation.setCreateDatetime(LocalDateTime.now());
+        btsStation.setCreateBy(staff.getStaffCode());
+        btsStation.setUpdateDatetime(LocalDateTime.now());
+        btsStation.setUpdateBy(staff.getStaffCode());
+        btsStationRepo.save(btsStation);
 
     }
 

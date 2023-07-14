@@ -859,11 +859,11 @@ public class BTSStationCtrl {
                         res.setDescription(r.getResourceMessage("bts.station.status.cannot.off", btsStationDTO.getSiteOnNims()));
                         return res;
                     }
-                    if (!(bTSStation.getApprovedStatus() == 1L)) {
-                        res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-                        res.setDescription(r.getResourceMessage("bts.station.approvedstatus.cannot.off", btsStationDTO.getSiteOnNims()));
-                        return res;
-                    }
+//                    if (!(bTSStation.getApprovedStatus() == 1L)) {
+//                        res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
+//                        res.setDescription(r.getResourceMessage("bts.station.approvedstatus.cannot.off", btsStationDTO.getSiteOnNims()));
+//                        return res;
+//                    }
                     commonInputDTO.setAppCode("IMT");
                     String roleCode = userService.getUserRole(commonInputDTO);
                     if (Constant.BTS_ROLES.CMS_BTS_NOC_STAFF.equals(roleCode)) {

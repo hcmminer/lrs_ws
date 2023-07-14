@@ -41,7 +41,8 @@ public interface UnitRepo extends JpaRepository<Unit, Long> {
             " else nvl(un.unit_name_vi,'') " +
             " end " +
             " ) like %:unitName%)" +
-            " and un.status = :status"
+            " and un.status = :status" +
+            " order by un.create_datetime desc "
             , nativeQuery = true)
     List<IUnit> findAllByProvinceIdAndUnitNameAndStatus(Long provinceId, String unitName, Long status, String lang);
 

@@ -76,8 +76,9 @@ public class OptionSetValueV1Ctrl {
         try {
             OptionSetValueV1DTO optionSetValueV1DTO =
                     commonInputDTO.getOptionSetValueV1DTO();
-            boolean isExists = optionSetValueV1Repo.existsByValueAndStatus(
+            boolean isExists = optionSetValueV1Repo.existsByValueAndOptionSetIdAndStatus(
                     optionSetValueV1DTO.getValue(),
+                    optionSetValueV1DTO.getOptionSetId(),
                     1L
             );
             if (isExists) {
@@ -121,7 +122,10 @@ public class OptionSetValueV1Ctrl {
             OptionSetValueV1DTO optionSetValueV1DTO =
                     commonInputDTO.getOptionSetValueV1DTO();
 
-            List<OptionSetValueV1> listRest = optionSetValueV1Repo.findAllByOptionSetValueIdNotAndStatus(optionSetValueV1DTO.getOptionSetValueId(), 1L);
+            List<OptionSetValueV1> listRest = optionSetValueV1Repo.findAllByOptionSetValueIdNotAndOptionSetIdAndStatus(
+                    optionSetValueV1DTO.getOptionSetValueId(),
+                    optionSetValueV1DTO.getOptionSetId() ,
+                    1L);
 
             List<OptionSetValueV1> listFilter = new ArrayList<>();
 
@@ -167,8 +171,9 @@ public class OptionSetValueV1Ctrl {
         try {
             OptionSetValueV1DTO optionSetValueV1DTO =
                     commonInputDTO.getOptionSetValueV1DTO();
-            boolean isExists = optionSetValueV1Repo.existsByValueAndStatus(
+            boolean isExists = optionSetValueV1Repo.existsByValueAndOptionSetIdAndStatus(
                     optionSetValueV1DTO.getValue(),
+                    optionSetValueV1DTO.getOptionSetId(),
                     1L
             );
             if (isExists) {

@@ -23,7 +23,7 @@ public interface OptionSetValueV1Repo extends JpaRepository<OptionSetValueV1, Lo
             "order by ops.create_datetime desc ", nativeQuery = true)
     List<IOptionSetValueV1> findAllByValueAndStatus(Long optionSetId, String value, Long status);
 
-    List<OptionSetValueV1> findAllByOptionSetValueIdNotAndStatus(Long optionSetValueId, Long status);
+    List<OptionSetValueV1> findAllByOptionSetValueIdNotAndOptionSetIdAndStatus(Long optionSetValueId,Long optionSetId ,Long status);
 
-    boolean existsByValueAndStatus(String value, Long status);
+    boolean existsByValueAndOptionSetIdAndStatus(String value,Long optionSetId ,Long status);
 }

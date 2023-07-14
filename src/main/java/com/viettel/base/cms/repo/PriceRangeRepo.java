@@ -51,7 +51,8 @@ public interface PriceRangeRepo extends JpaRepository<PriceRange, Long> {
             " WHERE " +
             " (:provinceId is null or nvl(pr.PROVINCE_ID,'') = :provinceId)" +
             " and (:areaId is null or nvl(pr.option_set_value_id,'') = :areaId)" +
-            " and pr.status = :status"
+            " and pr.status = :status" +
+            " order by pr.create_datetime desc "
             , nativeQuery = true)
     List<IPriceRange> findAllByProvinceIdAndOptionSetValueIdAndStatus(Long provinceId, Long areaId, Long status);
 

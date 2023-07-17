@@ -290,18 +290,6 @@ public class FunctionUtils {
                 res.setDescription(r.getResourceMessage("bts.station.code.already.exist"));
                 return res;
             }
-            List<BTSStation> constructionList1 = btsStationService.getListBTSStation(btsStationDTO);
-            if (constructionList1.size() > 0) {
-                res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-                res.setDescription(r.getResourceMessage("province.code.not.exist"));
-                return res;
-            }
-//            String constructionStatus = optionSetValueService.getOptionSetValueNameByValue(constructionDTO.getStatus(), "CONSTRUCTION_STATUS");
-//            if (StringUtils.isNullOrEmpty(constructionStatus)) {
-//                res.setErrorCode(Constant.EXECUTION_ERROR.ERROR);
-//                res.setDescription(r.getResourceMessage("construction.status.not.exist"));
-//                return res;
-//            }
 
         } catch (Exception e) {
             e.printStackTrace();

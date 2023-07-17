@@ -269,4 +269,13 @@ public class Constant {
     public static int DEFAULT_CURRENT_PAGE = 1;
     public static int DEFAULT_PAGE_LIMIT = 10;
 
+    public final class LRS_ROLES {
+        public final static String LRS_BTS_PNO = "LRS_BTS_PNO";
+        public final static String LRS_BTS_TCCN = "LRS_BTS_TCCN";
+        public final static String LRS_BTS_HTCN = "LRS_BTS_HTCN";
+        public final static String LRS_BTS_CND = "LRS_BTS_CND";
+        public final static String LRS_BTS_FND = "LRS_BTS_FND";
+        public final static String LRS_BTS_NOC = "LRS_BTS_NOC";
+    }
+
 }

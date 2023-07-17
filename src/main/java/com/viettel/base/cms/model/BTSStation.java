@@ -10,6 +10,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "bts_rent_place")
@@ -27,68 +28,129 @@ public class BTSStation {
     @Id
     @Column(name = "ID", nullable = false, updatable = false)
     private Long id;
-    @Column(name = "SITE_ON_CONTRACT", nullable = true, updatable = true)
-    private String siteOnContract;
-    @Column(name = "SITE_ON_NIMS", nullable = false, updatable = true)
+    @Column(name = "site_on_nims", nullable = true)
     private String siteOnNims;
-    @Column(name = "LATITUDE", nullable = false, updatable = true)
+    @Column(name = "lat_value", nullable = true)
     private String latitude;
-    @Column(name = "LONGITUDE", nullable = false, updatable = true)
+    @Column(name = "long_value", nullable = true)
     private String longitude;
-    @Column(name = "NAME", updatable = true)
-    private String name;
-    @Column(name = "ADDRESS_WARDS", updatable = true)
-    private String address;
-    @Column(name = "PRO_ID",  updatable = true)
-    private String province;
-    @Column(name = "DIST_ID",  updatable = true)
-    private String district;
-    @Column(name = "TELEPHONE", updatable = true)
-    private String telephone;
-    @Column(name = "NO_OF_CONTRACT", nullable = true, updatable = true)
-    private String contractNo;
-    @Column(name = "PERIOD_OF_RENT", updatable = true)
-    private Long preiodOfRent;
-    @Column(name = "START_DATE_CONTRACT",  updatable = true)
-    private String startDateContract;
-    @Column(name = "END_DATE_CONTRACT",  updatable = true)
-    private String endDateContract;
-    @Column(name = "SIGN_DATE_CONTRACT",  updatable = true)
-    private String signDateContract;
-    @Column(name = "BTS_AIRED_DATE",  updatable = true)
-    private String btsAiredDate;
-    @Column(name = "RENTAL_FEE",  updatable = true)
-    private Long rentalFee;
-    @Column(name = "PAYMENT_TIME", updatable = true)
-    private String paymentTime;
-    @Column(name = "FILE_CONTRACT", updatable = true)
-    private String fileContract;
-    @Column(name = "FILE_CR", updatable = true)
-    private String fileCR;
-    @Column(name = "HAS_ELECTRICITY", updatable = true)
-    private Long hasElectricity;
-    @Column(name = "APPROVED_STATUS", updatable = true)
-    private Long approvedStatus;
-    @Column(name = "STATUS", updatable = true)
-    private Long status;
-    @Column(name = "TURN_OFF_DATE",  updatable = true)
-    private String turnOffDate;
-    @Column(name = "CREATED_USER", updatable = true)
-    private String createdUser;
-    @Column(name = "CREATED_DATE", updatable = true)
-    private String createdDate;
-    @Column(name = "LAST_MODIFIED_USER", updatable = true)
-    private String lastModifiedUser;
-    @Column(name = "LAST_MODIFIED_DATE", updatable = true)
-    private String lastModifiedDate;
-    @Column(name = "START_DATE_PAYMENT",  updatable = true)
-    private String startDatePayment;
-    @Column(name = "END_DATE_PAYMENT",  updatable = true)
-    private String endDatePayment;
-    @Column(name = "AMOUNT",  updatable = true)
-    private Long amount;
-    @Column(name = "NOTES",  updatable = true)
+    @Column(name = "uses", nullable = true)
+    private Long uses;
+    @Column(name = "type_rental_area", nullable = true)
+    private Long typeRentalArea;
+    @Column(name = "unit_price", nullable = true)
+    private Long unitPrice;
+    @Column(name = "station_type", nullable = true)
+    private Long stationtype;
+    @Column(name = "station_type_by_service", nullable = true)
+    private Long stationTypeByService;
+    @Column(name = "station_locate", nullable = true)
+    private Long stationLocate;
+    @Column(name = "province_id", nullable = true)
+    private Long provinceId;
+    @Column(name = "district_id", nullable = true)
+    private Long districtId;
+    @Column(name = "commune_id", nullable = true)
+    private Long communeId;
+    @Column(name = "rent_position", nullable = true)
+    private Long rentPosition;
+    @Column(name = "notes", nullable = true)
     private String notes;
+    @Column(name = "construction_permit", nullable = true)
+    private Long constructionpermit;
+    @Column(name = "infor_status", nullable = true)
+    private String inforStatus;
+    @Column(name = "contract_no", nullable = true)
+    private String contractNo;
+    @Column(name = "sign_date_contract", nullable = true)
+    private LocalDateTime signDateContract;
+    @Column(name = "start_date_contract", nullable = true)
+    private LocalDateTime startDateContract;
+    @Column(name = "end_date_contract", nullable = true)
+    private LocalDateTime endDateContract;
+    @Column(name = "start_date_payment", nullable = true)
+    private LocalDateTime startDatePayment;
+    @Column(name = "end_date_payment", nullable = true)
+    private LocalDateTime endDatePayment;
+    @Column(name = "rent_period", nullable = true)
+    private Long rentPeriod;
+    @Column(name = "rent_type", nullable = true)
+    private Long rentType;
+    @Column(name = "rent_area", nullable = true)
+    private Long rentArea;
+    @Column(name = "is_vat", nullable = true)
+    private Long isVat;
+    @Column(name = "vat_rate", nullable = true)
+    private Long vatRate;
+    @Column(name = "currency_type", nullable = true)
+    private Long currencyType;
+    @Column(name = "exchange_rate", nullable = true)
+    private Long exchangeRate;
+    @Column(name = "total_rent_value", nullable = true)
+    private String totalRentValue;
+    @Column(name = "num_month_payment_1", nullable = true)
+    private Long numMonthPayment1;
+    @Column(name = "num_month_payment_2", nullable = true)
+    private Long numMonthPayment2;
+    @Column(name = "num_month_payment_3", nullable = true)
+    private Long numMonthPayment3;
+    @Column(name = "num_month_payment_4", nullable = true)
+    private Long numMonthPayment4;
+    @Column(name = "num_month_payment_5", nullable = true)
+    private Long numMonthPayment5;
+    @Column(name = "num_month_payment_6", nullable = true)
+    private Long numMonthPayment6;
+    @Column(name = "num_month_payment_7", nullable = true)
+    private Long numMonthPayment7;
+    @Column(name = "num_month_payment_8", nullable = true)
+    private Long numMonthPayment8;
+    @Column(name = "num_month_payment_9", nullable = true)
+    private Long numMonthPayment9;
+    @Column(name = "num_month_payment_10", nullable = true)
+    private Long numMonthPayment10;
+    @Column(name = "rent_contract_type", nullable = true)
+    private Long rentContractType;
+    @Column(name = "time_contract_type", nullable = true)
+    private Long timeContractType;
+    @Column(name = "tax_code", nullable = true)
+    private String taxCode;
+    @Column(name = "benefi_entity_num", nullable = true)
+    private String benefiEntityNum;
+    @Column(name = "benefi_bank_code", nullable = true)
+    private String benefiBankCode;
+    @Column(name = "landowner_type", nullable = true)
+    private Long landownerType;
+    @Column(name = "paid_to_maturity", nullable = true)
+    private String paidToMaturity;
+    @Column(name = "paid_to_year", nullable = true)
+    private String paidToYear;
+    @Column(name = "status", nullable = true)
+    private Long status;
+    @Column(name = "cancel_reason", nullable = true)
+    private String cancelReason;
+    @Column(name = "approve_status", nullable = true)
+    private Long approveStatus ;
+    @Column(name = "handover_date", nullable = true)
+    private LocalDateTime handoverDate;
+    @Column(name = "construction_start_date", nullable = true)
+    private LocalDateTime constructionStartDate;
+    @Column(name = "construction_note", nullable = true)
+    private String constructionNote;
+    @Column(name = "bts_aired_date", nullable = true)
+    private LocalDateTime btsAiredDate;
+    @Column(name = "bts_status", nullable = true)
+    private Long btsStatus;
+    @Column(name = "turn_off_date", nullable = true)
+    private LocalDateTime turnOffDate;
+    @Column(name = "creaate_datetime", nullable = true)
+    private LocalDateTime createDatetime;
+    @Column(name = "create_by", nullable = true)
+    private String createBy;
+    @Column(name = "update_datetime", nullable = true)
+    private LocalDateTime updateDatetime;
+    @Column(name = "update_by", nullable = true)
+    private String updateBy;
+
 
 
 
